@@ -40,3 +40,7 @@ coverage
 # Cache
 .eslintcache
 .stylelintcache
+
+.agent
+GEMINI.md
+ERRORS.md
