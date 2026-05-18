@@ -21,6 +21,7 @@ import HeadMenu from "@/components/Menus/Head.vue";
 import BottomMenu from "@/components/Menus/Bottom.vue";
 import Toast from "@/components/Toast.vue";
 import CreateTransaction from "@/components/Transactions/Create.vue";
+import { initGoogleServices } from "@/services/googleDrive";
 
 const store = useStore();
 const loading = ref(true);
@@ -28,6 +29,7 @@ const showTransactionModal = ref(false);
 
 onMounted(async () => {
   await store.initialize();
+  await initGoogleServices();
   setTimeout(() => {
     loading.value = false;
   }, 1000);

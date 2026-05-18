@@ -4,53 +4,104 @@
       <h4 class="mb-0">Sao Lưu & Khôi Phục</h4>
     </div>
 
+    <!-- Google Drive Backup -->
     <CCard class="my-3">
       <CCardBody>
-        <h5 class="mb-3">Xuất Dữ Liệu</h5>
-        <p class="text-medium-emphasis">
-          Tải xuống tất cả dữ liệu để sao lưu hoặc chuyển sang thiết bị khác
-        </p>
-        <CButton color="primary" @click="handleExport">Xuất Dữ Liệu</CButton>
-      </CCardBody>
-    </CCard>
+        <h5 class="mb-3 d-flex align-items-center">
+          <svg
+            class="me-2 text-primary"
+            style="width: 24px; height: 24px"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14C0,17.31 2.69,20 6,20H19C21.76,20 24,17.76 24,15C24,12.36 21.95,10.22 19.35,10.03Z"
+            />
+          </svg>
+          Google Drive
+        </h5>
 
-    <CCard class="my-3">
-      <CCardBody>
-        <h5 class="mb-3">Nhập Dữ Liệu</h5>
-        <p class="text-medium-emphasis">
-          Khôi phục dữ liệu từ file đã xuất trước đó. Lưu ý: Dữ liệu hiện tại sẽ
-          bị ghi đè
-        </p>
-        <div class="mb-3">
-          <CFormInput
-            type="file"
-            accept=".json"
-            @change="handleFileSelect"
-            ref="fileInput"
-          />
+        <div v-if="initError" class="alert alert-danger">
+          {{ initError }}
         </div>
-        <CButton
-          color="primary"
-          :disabled="!selectedFile"
-          @click="handleImport"
-        >
-          Nhập Dữ Liệu
-        </CButton>
+
+        <div v-else-if="!isAuthenticated">
+          <p class="text-medium-emphasis">
+            Đăng nhập để đồng bộ dữ liệu an toàn trên đám mây.
+          </p>
+          <CButton
+            color="primary"
+            @click="handleLogin"
+            :disabled="!isInitialized"
+          >
+            Đăng nhập bằng Google
+          </CButton>
+        </div>
+
+        <div v-else>
+          <p class="text-medium-emphasis mb-2">
+            <strong>Đã kết nối Google Drive</strong>.
+            <a href="#" class="text-danger ms-2" @click.prevent="handleLogout">
+              Đăng xuất
+            </a>
+          </p>
+          <p v-if="lastSyncTime" class="small text-muted mb-3">
+            Đồng bộ lần cuối:
+            {{ new Date(lastSyncTime).toLocaleString("vi-VN") }}
+          </p>
+          <p v-else class="small text-muted mb-3">Chưa từng đồng bộ</p>
+
+          <div class="d-flex gap-2">
+            <CButton
+              color="success"
+              class="text-white"
+              @click="handleSaveToDrive"
+              :disabled="isSyncing"
+            >
+              {{ isSyncing ? "Đang xử lý..." : "Sao lưu lên Drive" }}
+            </CButton>
+            <CButton
+              color="info"
+              class="text-white"
+              @click="handleLoadFromDrive"
+              :disabled="isSyncing"
+            >
+              {{ isSyncing ? "Đang xử lý..." : "Khôi phục từ Drive" }}
+            </CButton>
+          </div>
+        </div>
       </CCardBody>
     </CCard>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
 import { useStore } from "@/stores";
 import { storageService } from "@/services/storage.service";
+import {
+  isAuthenticated,
+  isInitialized,
+  isSyncing,
+  lastSyncTime,
+  initError,
+  login,
+  logout,
+  saveToDrive,
+  loadFromDrive,
+} from "@/services/googleDrive";
 
 const store = useStore();
-const selectedFile = ref(null);
-const fileInput = ref(null);
 
-const handleExport = () => {
+// Google Drive Sync methods
+const handleLogin = () => {
+  login();
+};
+
+const handleLogout = () => {
+  logout();
+};
+
+const handleSaveToDrive = async () => {
   try {
     const data = {
       accounts: store.accounts,
@@ -58,71 +109,35 @@ const handleExport = () => {
       transactions: store.transactions,
       exportDate: new Date().toISOString(),
     };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `sothuchi-backup-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    await saveToDrive(data);
+    alert("Đã lưu dữ liệu lên Google Drive thành công!");
   } catch (error) {
-    console.error("Export error:", error);
-    alert("Có lỗi khi xuất dữ liệu");
+    alert("Có lỗi khi lưu lên Drive: " + error.message);
   }
 };
 
-const handleFileSelect = (event) => {
-  selectedFile.value = event.target.files[0];
-};
+const handleLoadFromDrive = async () => {
+  if (!confirm("Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc chắn?")) {
+    return;
+  }
 
-const handleImport = async () => {
   try {
-    if (!selectedFile.value) {
-      throw new Error("Vui lòng chọn file");
+    const data = await loadFromDrive();
+    if (!data || !data.accounts || !data.categories || !data.transactions) {
+      throw new Error("Dữ liệu từ Drive không hợp lệ hoặc trống");
     }
 
-    if (!confirm("Dữ liệu hiện tại sẽ bị ghi đè. Bạn có chắc chắn?")) {
-      return;
-    }
+    // Import data
+    storageService.setItem("accounts", data.accounts);
+    storageService.setItem("categories", data.categories);
+    storageService.setItem("transactions", data.transactions);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
+    // Reload data in store
+    await store.initialize();
 
-        // Validate data structure
-        if (!data.accounts || !data.categories || !data.transactions) {
-          throw new Error("File dữ liệu không hợp lệ");
-        }
-
-        // Import data
-        storageService.setItem("accounts", data.accounts);
-        storageService.setItem("categories", data.categories);
-        storageService.setItem("transactions", data.transactions);
-
-        // Reload data in store
-        await store.initialize();
-
-        alert("Nhập dữ liệu thành công");
-        fileInput.value.value = ""; // Reset file input
-        selectedFile.value = null;
-      } catch (error) {
-        console.error("Import error:", error);
-        alert("File dữ liệu không hợp lệ");
-      }
-    };
-
-    reader.readAsText(selectedFile.value);
+    alert("Đã khôi phục dữ liệu từ Google Drive thành công!");
   } catch (error) {
-    console.error("Import error:", error);
-    alert(error.message || "Có lỗi khi nhập dữ liệu");
+    alert("Có lỗi khi tải từ Drive: " + error.message);
   }
 };
 </script>
