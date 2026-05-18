@@ -12,10 +12,35 @@ const store = reactive({
     this.categories = storageService.getItem("categories", []);
     this.transactions = storageService.getItem("transactions", []);
 
+    // Create default accounts if empty
+    if (this.accounts.length === 0) {
+      this.accounts = [
+        { id: "acc_1", name: "Tiền mặt", balance: 0, icon: "cil-wallet", color: "success" },
+        { id: "acc_2", name: "Vietcombank", balance: 0, icon: "cil-bank", color: "primary" }
+      ];
+      storageService.setItem("accounts", this.accounts);
+    }
+
+    // Create default categories if empty
+    if (this.categories.length === 0) {
+      this.categories = [
+        { id: "cat_1", name: "Ăn uống", type: "expense", icon: "cil-fastfood", color: "warning" },
+        { id: "cat_2", name: "Di chuyển", type: "expense", icon: "cil-car-alt", color: "info" },
+        { id: "cat_3", name: "Mua sắm", type: "expense", icon: "cil-cart", color: "danger" },
+        { id: "cat_4", name: "Hóa đơn", type: "expense", icon: "cil-file", color: "secondary" },
+        { id: "cat_5", name: "Lương", type: "income", icon: "cil-money", color: "success" },
+        { id: "cat_6", name: "Thưởng", type: "income", icon: "cil-gift", color: "primary" }
+      ];
+      storageService.setItem("categories", this.categories);
+    }
+
     // Load default account from localStorage
     const savedDefaultAccountId = localStorage.getItem("defaultAccountId");
-    if (savedDefaultAccountId) {
+    if (savedDefaultAccountId && this.accounts.some(a => a.id === savedDefaultAccountId)) {
       this.defaultAccountId = savedDefaultAccountId;
+    } else if (this.accounts.length > 0) {
+      this.defaultAccountId = this.accounts[0].id;
+      localStorage.setItem("defaultAccountId", this.defaultAccountId);
     }
   },
 
