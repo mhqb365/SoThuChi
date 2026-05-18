@@ -1,5 +1,5 @@
 <template>
-  <CNavbar expand="lg" colorScheme="light" class="bg-light d-none d-md-block">
+  <CNavbar expand="lg" color-scheme="light" class="bg-light d-none d-md-block">
     <CContainer fluid>
       <router-link class="navbar-brand" to="/">Sổ Thu Chi</router-link>
       <CNavbarToggler @click="visible = !visible" />

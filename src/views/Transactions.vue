@@ -3,8 +3,8 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h4 class="mb-0">Giao Dịch</h4>
       <DateRange
+        default-value="thisMonth"
         @range-selected="handleDateRangeChange"
-        defaultValue="thisMonth"
       />
     </div>
 
@@ -65,7 +65,7 @@
                 {{
                   transaction.type === "transfer"
                     ? `${getAccountName(
-                        transaction.fromAccount
+                        transaction.fromAccount,
                       )} → ${getAccountName(transaction.toAccount)}`
                     : transaction.description
                 }}
@@ -87,8 +87,8 @@
                   transaction.type === "income"
                     ? "+"
                     : transaction.type === "expense"
-                    ? "-"
-                    : ""
+                      ? "-"
+                      : ""
                 }}{{ transaction.amount.toLocaleString() }}đ
               </h5>
               <CButton
@@ -241,7 +241,7 @@ onMounted(() => {
     const categoryId = categoryIdFromQuery.toString();
     // Verify the category exists in the store
     const categoryExists = store.categories.find(
-      (cat) => cat.id === categoryId
+      (cat) => cat.id === categoryId,
     );
     if (categoryExists) {
       selectedCategoryId.value = categoryId;
@@ -268,7 +268,7 @@ watch(
       // Keep as string since store.categories IDs are strings
       const categoryId = newCategoryId.toString();
       const categoryExists = store.categories.find(
-        (cat) => cat.id === categoryId
+        (cat) => cat.id === categoryId,
       );
       if (categoryExists) {
         selectedCategoryId.value = categoryId;
@@ -277,7 +277,7 @@ watch(
       selectedCategoryId.value = null;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Watch for account query changes
@@ -295,7 +295,7 @@ watch(
       selectedAccountId.value = null;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const selectedCategoryLabel = computed(() => {
@@ -303,7 +303,7 @@ const selectedCategoryLabel = computed(() => {
     return "Tất cả d.mục";
   }
   const category = store.categories.find(
-    (cat) => cat.id === selectedCategoryId.value
+    (cat) => cat.id === selectedCategoryId.value,
   );
   return category ? category.name : "Tất cả d.mục";
 });
@@ -313,7 +313,7 @@ const selectedAccountLabel = computed(() => {
     return "Tất cả t.khoản ";
   }
   const account = store.accounts.find(
-    (acc) => acc.id === selectedAccountId.value
+    (acc) => acc.id === selectedAccountId.value,
   );
   return account ? account.name : "Tất cả t.khoản";
 });
@@ -334,7 +334,7 @@ const getTransactionDateTime = (transaction) => {
   return transaction.type === "transfer"
     ? ""
     : `${getAccountName(transaction.accountId)} - ${getCategoryName(
-        transaction.categoryId
+        transaction.categoryId,
       )}`;
 };
 

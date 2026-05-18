@@ -5,7 +5,9 @@
     "scripts": {
         "dev": "vite --mode development",
         "build": "vite build --mode production",
-        "preview": "vite preview --mode production"
+        "preview": "vite preview --mode production",
+        "lint": "eslint . --fix",
+        "format": "prettier --write src/"
     },
     "dependencies": {
         "@coreui/coreui": "^4.3.0",
@@ -22,6 +24,10 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.2.3",
+        "eslint": "^10.4.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-vue": "^10.9.1",
+        "prettier": "^3.8.3",
         "vite": "^4.4.9"
     }
 }

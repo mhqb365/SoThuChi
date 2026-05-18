@@ -11,8 +11,8 @@
           <CRow class="mb-3">
             <CCol>
               <CFormSelect
-                label="Loại"
                 v-model="form.type"
+                label="Loại"
                 :options="[
                   { label: 'Thu Nhập', value: 'income' },
                   { label: 'Chi Tiêu', value: 'expense' },
@@ -23,8 +23,8 @@
             </CCol>
             <CCol>
               <CFormSelect
-                label="Tài Khoản"
                 v-model="form.accountId"
+                label="Tài Khoản"
                 :options="[
                   { label: 'Chọn tài khoản', value: '' },
                   ...accounts.map((acc) => ({
@@ -39,8 +39,8 @@
           <CRow class="mb-3">
             <CCol>
               <CFormSelect
-                label="Danh Mục"
                 v-model="form.categoryId"
+                label="Danh Mục"
                 :options="[
                   { label: 'Chọn danh mục', value: '' },
                   ...filteredCategories.map((cat) => ({
@@ -53,26 +53,26 @@
             </CCol>
             <CCol>
               <CFormInput
+                v-model.number="form.amount"
                 label="Số Tiền"
                 type="number"
                 inputmode="numeric"
-                v-model.number="form.amount"
                 required
               />
             </CCol>
           </CRow>
 
           <CFormInput
+            v-model="form.description"
             class="mb-3"
             label="Mô Tả"
-            v-model="form.description"
             required
           />
         </template>
         <template v-else>
           <CFormSelect
-            label="Từ Tài Khoản"
             v-model="form.fromAccount"
+            label="Từ Tài Khoản"
             :options="[
               { label: 'Chọn tài khoản', value: '' },
               ...accounts.map((acc) => ({
@@ -83,8 +83,8 @@
             required
           />
           <CFormSelect
-            label="Đến Tài Khoản"
             v-model="form.toAccount"
+            label="Đến Tài Khoản"
             :options="[
               { label: 'Chọn tài khoản', value: '' },
               ...accounts.map((acc) => ({
@@ -98,12 +98,12 @@
 
         <div class="d-flex">
           <CFormInput
-            type="date"
             v-model="form.dateInput"
+            type="date"
             required
             class="me-2"
           />
-          <CFormInput type="time" v-model="form.timeInput" required />
+          <CFormInput v-model="form.timeInput" type="time" required />
         </div>
       </CForm>
     </CModalBody>
@@ -120,8 +120,14 @@ import { useStore } from "@/stores";
 import moment from "moment";
 
 const props = defineProps({
-  visible: Boolean,
-  transaction: Object,
+  visible: {
+    type: Boolean,
+    default: false,
+  },
+  transaction: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 const emit = defineEmits(["close", "submit"]);
@@ -159,7 +165,7 @@ watch(
       };
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const accounts = computed(() => store.accounts);
@@ -170,7 +176,7 @@ const filteredCategories = computed(() => {
 
 const handleTypeChange = () => {
   const defaultCategory = store.categories.find(
-    (cat) => cat.type === form.value.type
+    (cat) => cat.type === form.value.type,
   );
   form.value.categoryId = defaultCategory?.id?.toString() || "";
 };
@@ -195,7 +201,7 @@ const handleSubmit = async () => {
   try {
     const date = moment(
       `${form.value.dateInput} ${form.value.timeInput}`,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
 
     await store.updateTransaction({

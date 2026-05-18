@@ -8,8 +8,8 @@
       </router-link>
 
       <DateRange
+        default-value="thisMonth"
         @range-selected="handleDateRangeChange"
-        defaultValue="thisMonth"
       />
     </div>
 
@@ -261,7 +261,7 @@ const netBalance = computed(() => {
 // Thống kê danh mục chi tiêu
 const expenseCategoryStats = computed(() => {
   const expenseTransactions = filteredTransactions.value.filter(
-    (t) => t.type === "expense"
+    (t) => t.type === "expense",
   );
   const categoryMap = {};
 
@@ -295,7 +295,7 @@ const expenseCategoryStats = computed(() => {
 // Thống kê danh mục thu nhập
 const incomeCategoryStats = computed(() => {
   const incomeTransactions = filteredTransactions.value.filter(
-    (t) => t.type === "income"
+    (t) => t.type === "income",
   );
   const categoryMap = {};
 
@@ -328,7 +328,7 @@ const incomeCategoryStats = computed(() => {
 
 // Giao dịch gần đây (5 giao dịch mới nhất)
 const recentTransactions = computed(() => {
-  return filteredTransactions.value
+  return [...filteredTransactions.value]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 });

@@ -103,14 +103,14 @@
       <CModalBody>
         <CForm @submit.prevent="handleCategorySubmit">
           <CFormInput
+            v-model="categoryForm.name"
             class="mb-3"
             label="Tên Danh Mục"
-            v-model="categoryForm.name"
             required
           />
           <CFormSelect
-            label="Loại"
             v-model="categoryForm.type"
+            label="Loại"
             :options="[
               { label: 'Thu Nhập', value: 'income' },
               { label: 'Chi Tiêu', value: 'expense' },
@@ -225,11 +225,11 @@ const handleDeleteConfirm = () => {
 const expenseCategories = computed(() =>
   store.categories
     .filter((cat) => cat.type === "expense")
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => a.name.localeCompare(b.name)),
 );
 const incomeCategories = computed(() =>
   store.categories
     .filter((cat) => cat.type === "income")
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => a.name.localeCompare(b.name)),
 );
 </script>

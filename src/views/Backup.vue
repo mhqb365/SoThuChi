@@ -31,8 +31,8 @@
           </p>
           <CButton
             color="primary"
-            @click="handleLogin"
             :disabled="!isInitialized"
+            @click="handleLogin"
           >
             Đăng nhập bằng Google
           </CButton>
@@ -55,16 +55,16 @@
             <CButton
               color="success"
               class="text-white"
-              @click="handleSaveToDrive"
               :disabled="isSyncing"
+              @click="handleSaveToDrive"
             >
               {{ isSyncing ? "Đang xử lý..." : "Sao lưu lên Drive" }}
             </CButton>
             <CButton
               color="info"
               class="text-white"
-              @click="handleLoadFromDrive"
               :disabled="isSyncing"
+              @click="handleLoadFromDrive"
             >
               {{ isSyncing ? "Đang xử lý..." : "Khôi phục từ Drive" }}
             </CButton>

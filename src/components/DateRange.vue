@@ -5,9 +5,9 @@
     </CDropdownToggle>
     <CDropdownMenu>
       <CDropdownItem
-        class="cursor"
         v-for="option in dateOptions"
         :key="option.value"
+        class="cursor"
         @click="selectRange(option)"
       >
         {{ option.label }}
@@ -114,7 +114,7 @@ const selectedOption = ref(dateOptions[0]);
 
 onMounted(() => {
   const defaultOption = dateOptions.find(
-    (opt) => opt.value === props.defaultValue
+    (opt) => opt.value === props.defaultValue,
   );
   if (defaultOption) {
     selectRange(defaultOption);

@@ -2,8 +2,8 @@
   <CToaster placement="top-end">
     <CToast
       :visible="toastStore.visible"
-      @close="toastStore.hide"
       :color="toastStore.color"
+      @close="toastStore.hide"
     >
       <CToastHeader>
         <span class="me-auto fw-bold">Thông báo</span>

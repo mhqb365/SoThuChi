@@ -6,9 +6,9 @@
     <CModalBody>
       <CForm @submit.prevent="handleSubmit">
         <CFormSelect
+          v-model="form.fromAccount"
           class="mb-3"
           label="Từ Tài Khoản"
-          v-model="form.fromAccount"
           :options="[
             { label: 'Chọn tài khoản', value: '' },
             ...accounts.map((acc) => ({
@@ -19,9 +19,9 @@
           required
         />
         <CFormSelect
+          v-model="form.toAccount"
           class="mb-3"
           label="Đến Tài Khoản"
-          v-model="form.toAccount"
           :options="[
             { label: 'Chọn tài khoản', value: '' },
             ...accounts.map((acc) => ({
@@ -32,21 +32,21 @@
           required
         />
         <CFormInput
+          v-model.number="form.amount"
           class="mb-3"
           label="Số Tiền"
           type="number"
           inputmode="numeric"
-          v-model.number="form.amount"
           required
         />
         <div class="mb-3 d-flex">
           <CFormInput
-            type="date"
             v-model="form.dateInput"
+            type="date"
             required
             class="me-2"
           />
-          <CFormInput type="time" v-model="form.timeInput" required />
+          <CFormInput v-model="form.timeInput" type="time" required />
         </div>
       </CForm>
     </CModalBody>
@@ -113,7 +113,7 @@ const handleSubmit = async () => {
 
     const date = moment(
       `${form.value.dateInput} ${form.value.timeInput}`,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
 
     await store.addTransaction({

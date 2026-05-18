@@ -15,8 +15,20 @@ const store = reactive({
     // Create default accounts if empty
     if (this.accounts.length === 0) {
       this.accounts = [
-        { id: "acc_1", name: "Tiền mặt", balance: 0, icon: "cil-wallet", color: "success" },
-        { id: "acc_2", name: "Vietcombank", balance: 0, icon: "cil-bank", color: "primary" }
+        {
+          id: "acc_1",
+          name: "Tiền mặt",
+          balance: 0,
+          icon: "cil-wallet",
+          color: "success",
+        },
+        {
+          id: "acc_2",
+          name: "Vietcombank",
+          balance: 0,
+          icon: "cil-bank",
+          color: "primary",
+        },
       ];
       storageService.setItem("accounts", this.accounts);
     }
@@ -24,19 +36,58 @@ const store = reactive({
     // Create default categories if empty
     if (this.categories.length === 0) {
       this.categories = [
-        { id: "cat_1", name: "Ăn uống", type: "expense", icon: "cil-fastfood", color: "warning" },
-        { id: "cat_2", name: "Di chuyển", type: "expense", icon: "cil-car-alt", color: "info" },
-        { id: "cat_3", name: "Mua sắm", type: "expense", icon: "cil-cart", color: "danger" },
-        { id: "cat_4", name: "Hóa đơn", type: "expense", icon: "cil-file", color: "secondary" },
-        { id: "cat_5", name: "Lương", type: "income", icon: "cil-money", color: "success" },
-        { id: "cat_6", name: "Thưởng", type: "income", icon: "cil-gift", color: "primary" }
+        {
+          id: "cat_1",
+          name: "Ăn uống",
+          type: "expense",
+          icon: "cil-fastfood",
+          color: "warning",
+        },
+        {
+          id: "cat_2",
+          name: "Di chuyển",
+          type: "expense",
+          icon: "cil-car-alt",
+          color: "info",
+        },
+        {
+          id: "cat_3",
+          name: "Mua sắm",
+          type: "expense",
+          icon: "cil-cart",
+          color: "danger",
+        },
+        {
+          id: "cat_4",
+          name: "Hóa đơn",
+          type: "expense",
+          icon: "cil-file",
+          color: "secondary",
+        },
+        {
+          id: "cat_5",
+          name: "Lương",
+          type: "income",
+          icon: "cil-money",
+          color: "success",
+        },
+        {
+          id: "cat_6",
+          name: "Thưởng",
+          type: "income",
+          icon: "cil-gift",
+          color: "primary",
+        },
       ];
       storageService.setItem("categories", this.categories);
     }
 
     // Load default account from localStorage
     const savedDefaultAccountId = localStorage.getItem("defaultAccountId");
-    if (savedDefaultAccountId && this.accounts.some(a => a.id === savedDefaultAccountId)) {
+    if (
+      savedDefaultAccountId &&
+      this.accounts.some((a) => a.id === savedDefaultAccountId)
+    ) {
       this.defaultAccountId = savedDefaultAccountId;
     } else if (this.accounts.length > 0) {
       this.defaultAccountId = this.accounts[0].id;
@@ -63,7 +114,7 @@ const store = reactive({
 
   deleteAccount(id) {
     const hasTransactions = this.transactions.some(
-      (t) => t.accountId === id || t.fromAccount === id || t.toAccount === id
+      (t) => t.accountId === id || t.fromAccount === id || t.toAccount === id,
     );
     if (hasTransactions) {
       throw new Error("Không thể xóa tài khoản đã có giao dịch");
@@ -113,10 +164,10 @@ const store = reactive({
     // Handle balance updates
     if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
-        (a) => a.id === transaction.fromAccount
+        (a) => a.id === transaction.fromAccount,
       );
       const toAccount = this.accounts.find(
-        (a) => a.id === transaction.toAccount
+        (a) => a.id === transaction.toAccount,
       );
 
       if (!fromAccount || !toAccount) {
@@ -146,7 +197,7 @@ const store = reactive({
 
   updateTransaction(transaction) {
     const oldTransaction = this.transactions.find(
-      (t) => t.id === transaction.id
+      (t) => t.id === transaction.id,
     );
     if (!oldTransaction) {
       throw new Error("Giao dịch không tồn tại");
@@ -155,16 +206,16 @@ const store = reactive({
     // Revert old transaction's effect on balances
     if (oldTransaction.type === "transfer") {
       const oldFromAccount = this.accounts.find(
-        (a) => a.id === oldTransaction.fromAccount
+        (a) => a.id === oldTransaction.fromAccount,
       );
       const oldToAccount = this.accounts.find(
-        (a) => a.id === oldTransaction.toAccount
+        (a) => a.id === oldTransaction.toAccount,
       );
       oldFromAccount.balance += oldTransaction.amount;
       oldToAccount.balance -= oldTransaction.amount;
     } else {
       const oldAccount = this.accounts.find(
-        (a) => a.id === oldTransaction.accountId
+        (a) => a.id === oldTransaction.accountId,
       );
       if (oldTransaction.type === "expense") {
         oldAccount.balance += oldTransaction.amount;
@@ -176,10 +227,10 @@ const store = reactive({
     // Apply new transaction's effect on balances
     if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
-        (a) => a.id === transaction.fromAccount
+        (a) => a.id === transaction.fromAccount,
       );
       const toAccount = this.accounts.find(
-        (a) => a.id === transaction.toAccount
+        (a) => a.id === transaction.toAccount,
       );
 
       if (!fromAccount || !toAccount) {
@@ -217,10 +268,10 @@ const store = reactive({
     // Revert transaction's effect on balances
     if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
-        (a) => a.id === transaction.fromAccount
+        (a) => a.id === transaction.fromAccount,
       );
       const toAccount = this.accounts.find(
-        (a) => a.id === transaction.toAccount
+        (a) => a.id === transaction.toAccount,
       );
       fromAccount.balance += transaction.amount;
       toAccount.balance -= transaction.amount;

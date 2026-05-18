@@ -13,8 +13,8 @@
         <CNavItem>
           <CNavLink
             :active="activeTab === 0"
-            @click="activeTab = 0"
             role="button"
+            @click="activeTab = 0"
           >
             Giao Dịch
           </CNavLink>
@@ -22,8 +22,8 @@
         <CNavItem>
           <CNavLink
             :active="activeTab === 1"
-            @click="activeTab = 1"
             role="button"
+            @click="activeTab = 1"
           >
             Chuyển Khoản
           </CNavLink>
@@ -38,8 +38,8 @@
             <CRow class="mb-2">
               <CCol>
                 <CFormSelect
-                  label="Loại"
                   v-model="transactionForm.type"
+                  label="Loại"
                   :options="[
                     { label: 'Thu Nhập', value: 'income' },
                     { label: 'Chi Tiêu', value: 'expense' },
@@ -50,8 +50,8 @@
               </CCol>
               <CCol>
                 <CFormSelect
-                  label="Tài Khoản"
                   v-model="transactionForm.accountId"
+                  label="Tài Khoản"
                   :options="[
                     { label: 'Chọn tài khoản', value: '' },
                     ...store.accounts.map((acc) => ({
@@ -67,8 +67,8 @@
             <CRow class="mb-3">
               <CCol>
                 <CFormSelect
-                  label="Danh Mục"
                   v-model="transactionForm.categoryId"
+                  label="Danh Mục"
                   :options="[
                     { label: 'Chọn danh mục', value: '' },
                     ...filteredCategories.map((cat) => ({
@@ -81,32 +81,32 @@
               </CCol>
               <CCol>
                 <CFormInput
+                  v-model.number="transactionForm.amount"
                   label="Số Tiền"
                   type="number"
                   inputmode="numeric"
-                  v-model.number="transactionForm.amount"
                   required
                 />
               </CCol>
             </CRow>
 
             <CFormInput
+              v-model="transactionForm.description"
               class="mb-3"
               label="Mô Tả"
-              v-model="transactionForm.description"
               required
             />
 
             <div class="d-flex">
               <CFormInput
-                type="date"
                 v-model="transactionForm.dateInput"
+                type="date"
                 required
                 class="me-2"
               />
               <CFormInput
-                type="time"
                 v-model="transactionForm.timeInput"
+                type="time"
                 required
               />
             </div>
@@ -117,9 +117,9 @@
         <div v-show="activeTab === 1">
           <CForm @submit.prevent="handleTransferSubmit">
             <CFormSelect
+              v-model="transferForm.fromAccount"
               class="mb-3"
               label="Từ Tài Khoản"
-              v-model="transferForm.fromAccount"
               :options="[
                 { label: 'Chọn tài khoản', value: '' },
                 ...store.accounts.map((acc) => ({
@@ -130,9 +130,9 @@
               required
             />
             <CFormSelect
+              v-model="transferForm.toAccount"
               class="mb-3"
               label="Đến Tài Khoản"
-              v-model="transferForm.toAccount"
               :options="[
                 { label: 'Chọn tài khoản', value: '' },
                 ...store.accounts.map((acc) => ({
@@ -143,23 +143,23 @@
               required
             />
             <CFormInput
+              v-model.number="transferForm.amount"
               class="mb-3"
               label="Số Tiền"
               type="number"
               inputmode="numeric"
-              v-model.number="transferForm.amount"
               required
             />
             <div class="mb-3 d-flex">
               <CFormInput
-                type="date"
                 v-model="transferForm.dateInput"
+                type="date"
                 required
                 class="me-2"
               />
               <CFormInput
-                type="time"
                 v-model="transferForm.timeInput"
+                type="time"
                 required
               />
             </div>
@@ -210,7 +210,7 @@ const getDefaultAccountId = () => {
   if (
     store.defaultAccountId &&
     store.accounts.find(
-      (acc) => acc.id.toString() === store.defaultAccountId.toString()
+      (acc) => acc.id.toString() === store.defaultAccountId.toString(),
     )
   ) {
     return store.defaultAccountId.toString();
@@ -236,21 +236,27 @@ const transferForm = ref({
 });
 
 const filteredCategories = computed(() => {
-  const filtered = store.categories
+  return store.categories
     .filter((cat) => cat.type === transactionForm.value.type)
     .sort((a, b) => a.name.localeCompare(b.name));
-  if (
-    filtered.length > 0 &&
-    !filtered.find((cat) => cat.id === transactionForm.value.categoryId)
-  ) {
-    transactionForm.value.categoryId = filtered[0].id.toString();
-  }
-  return filtered;
 });
+
+watch(
+  filteredCategories,
+  (filtered) => {
+    if (
+      filtered.length > 0 &&
+      !filtered.find((cat) => cat.id === transactionForm.value.categoryId)
+    ) {
+      transactionForm.value.categoryId = filtered[0].id.toString();
+    }
+  },
+  { immediate: true },
+);
 
 const handleTypeChange = () => {
   transactionForm.value.categoryId = getDefaultCategoryId(
-    transactionForm.value.type
+    transactionForm.value.type,
   );
 };
 
@@ -268,7 +274,7 @@ watch(
     if (!userChangedAccount.value && newAccountId) {
       userChangedAccount.value = true;
     }
-  }
+  },
 );
 
 const handleTransactionSubmit = async () => {
@@ -285,7 +291,7 @@ const handleTransactionSubmit = async () => {
 
     const date = moment(
       `${transactionForm.value.dateInput} ${transactionForm.value.timeInput}`,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
 
     await store.addTransaction({
@@ -337,7 +343,7 @@ const handleTransferSubmit = async () => {
 
     const date = moment(
       `${transferForm.value.dateInput} ${transferForm.value.timeInput}`,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
 
     await store.addTransaction({

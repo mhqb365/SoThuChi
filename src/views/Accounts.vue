@@ -85,23 +85,23 @@
       <CModalBody>
         <CForm @submit.prevent="handleAccountSubmit">
           <CFormInput
+            v-model="accountForm.name"
             class="mb-3"
             label="Tên Tài Khoản"
-            v-model="accountForm.name"
             required
           />
           <CFormInput
+            v-model.number="accountForm.balance"
             class="mb-3"
             label="Số Dư"
             type="number"
             inputmode="numeric"
-            v-model.number="accountForm.balance"
             required
           />
           <CFormInput
+            v-model="accountForm.description"
             class="mb-3"
             label="Mô Tả"
-            v-model="accountForm.description"
           />
 
           <CFormCheck
@@ -259,7 +259,9 @@ const viewAccountTransactions = (accountId) => {
 
 <style scoped>
 .account-item {
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
 }
 
 .account-item:hover {
