@@ -32,10 +32,10 @@ PullToRefresh.init({
         const { useStore } = await import("@/stores");
         const { useToastStore } = await import("@/stores/toast.store");
         const { storageService } = await import("@/services/storage.service");
-        
+
         const store = useStore();
         const toastStore = useToastStore();
-        
+
         const synced = await autoSync(async (data) => {
           if (data && data.accounts && data.categories && data.transactions) {
             storageService.setItem("accounts", data.accounts);
@@ -45,9 +45,9 @@ PullToRefresh.init({
             toastStore.show("Đã làm mới dữ liệu thành công!", "success");
           }
         });
-        
+
         if (!synced) {
-           toastStore.show("Dữ liệu đã ở trạng thái mới nhất", "info");
+          toastStore.show("Dữ liệu đã ở trạng thái mới nhất", "info");
         }
       } catch (error) {
         console.error("Lỗi khi pull to refresh:", error);
