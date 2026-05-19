@@ -18,6 +18,7 @@ export const initError = ref(null);
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
+let authResolver = null;
 
 const CONFIG_FILE_NAME = "sothuchi_data.json";
 
@@ -37,8 +38,8 @@ export async function initGoogleServices() {
     }, 100);
   });
 
-  await initializeGapiClient();
   initializeGisClient();
+  await initializeGapiClient();
 }
 
 async function initializeGapiClient() {
@@ -52,7 +53,7 @@ async function initializeGapiClient() {
       discoveryDocs: [DISCOVERY_DOC],
     });
     gapiInited = true;
-    checkAuth();
+    await checkAuth();
   } catch (err) {
     console.error("Error initializing GAPI client", err);
     initError.value =
@@ -67,7 +68,16 @@ function initializeGisClient() {
     scope: SCOPES,
     callback: (resp) => {
       if (resp.error !== undefined) {
-        throw resp;
+        console.warn("G Drive Auth callback error:", resp.error);
+        isAuthenticated.value = false;
+        localStorage.removeItem("google_access_token");
+        localStorage.removeItem("google_token_expiry");
+        localStorage.setItem("google_logged_in", "false");
+        if (authResolver) {
+          authResolver(false);
+          authResolver = null;
+        }
+        return;
       }
       isAuthenticated.value = true;
       localStorage.setItem("google_access_token", resp.access_token);
@@ -76,36 +86,82 @@ function initializeGisClient() {
         Date.now() + resp.expires_in * 1000,
       );
       localStorage.setItem("google_logged_in", "true");
+
+      try {
+        gapi.client.setToken({ access_token: resp.access_token });
+      } catch (e) {
+        console.warn("Failed to set GAPI token in callback", e);
+      }
+
+      if (authResolver) {
+        authResolver(true);
+        authResolver = null;
+      }
     },
   });
   gisInited = true;
 }
 
 function checkAuth() {
-  const token = localStorage.getItem("google_access_token");
-  const expiry = localStorage.getItem("google_token_expiry");
+  return new Promise((resolve) => {
+    const token = localStorage.getItem("google_access_token");
+    const expiry = localStorage.getItem("google_token_expiry");
 
-  // Check if we have a token and if it's still valid
-  const now = Date.now();
-  const expiryTime = parseInt(expiry) || 0;
+    // Check if we have a token and if it's still valid
+    const now = Date.now();
+    const expiryTime = parseInt(expiry) || 0;
 
-  if (token && expiryTime > now) {
-    try {
-      gapi.client.setToken({ access_token: token });
-      isAuthenticated.value = true;
-      console.log("G Drive: Session restored successfully");
-    } catch (e) {
-      console.warn("G Drive: Failed to set token", e);
-      isAuthenticated.value = false;
+    if (token && expiryTime > now) {
+      try {
+        gapi.client.setToken({ access_token: token });
+        isAuthenticated.value = true;
+        console.log("G Drive: Session restored successfully");
+        isInitialized.value = true;
+        resolve(true);
+      } catch (e) {
+        console.warn("G Drive: Failed to set token", e);
+        isAuthenticated.value = false;
+        isInitialized.value = true;
+        resolve(false);
+      }
+    } else {
+      const loggedIn = localStorage.getItem("google_logged_in");
+      if (loggedIn === "true" && tokenClient) {
+        console.log("G Drive: Token expired. Attempting silent refresh...");
+
+        const timeout = setTimeout(() => {
+          if (authResolver) {
+            console.warn("G Drive: Silent refresh timed out");
+            isAuthenticated.value = false;
+            authResolver(false);
+            authResolver = null;
+            isInitialized.value = true;
+          }
+        }, 5000);
+
+        authResolver = (result) => {
+          clearTimeout(timeout);
+          isInitialized.value = true;
+          resolve(result);
+        };
+
+        try {
+          tokenClient.requestAccessToken({ prompt: "none" });
+        } catch (e) {
+          clearTimeout(timeout);
+          console.warn("G Drive: Silent refresh failed", e);
+          isAuthenticated.value = false;
+          authResolver = null;
+          isInitialized.value = true;
+          resolve(false);
+        }
+      } else {
+        isAuthenticated.value = false;
+        isInitialized.value = true;
+        resolve(false);
+      }
     }
-  } else {
-    // Token expired or missing - user needs to reconnect manually
-    isAuthenticated.value = false;
-    if (token) {
-      console.log("G Drive: Token expired. Please reconnect manually.");
-    }
-  }
-  isInitialized.value = true;
+  });
 }
 
 export function login() {
