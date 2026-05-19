@@ -33,14 +33,17 @@ const showTransactionModal = ref(false);
 onMounted(async () => {
   await store.initialize();
   await initGoogleServices();
-  
+
   await autoSync(async (data) => {
     if (data && data.accounts && data.categories && data.transactions) {
       storageService.setItem("accounts", data.accounts);
       storageService.setItem("categories", data.categories);
       storageService.setItem("transactions", data.transactions);
       await store.initialize();
-      toastStore.show("Đã đồng bộ dữ liệu mới nhất từ Google Drive!", "success");
+      toastStore.show(
+        "Đã đồng bộ dữ liệu mới nhất từ Google Drive!",
+        "success",
+      );
     }
   });
   setTimeout(() => {

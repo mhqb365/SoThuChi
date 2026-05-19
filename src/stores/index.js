@@ -16,7 +16,9 @@ const store = reactive({
         transactions: this.transactions,
         exportDate: new Date().toISOString(),
       };
-      saveToDrive(data).catch((err) => console.error("Auto backup failed:", err));
+      saveToDrive(data).catch((err) =>
+        console.error("Auto backup failed:", err),
+      );
     }
   },
 
