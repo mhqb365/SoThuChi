@@ -26,7 +26,35 @@ PullToRefresh.init({
   distMax: 80,
   distReload: 50,
   onRefresh() {
-    location.reload(); // hoặc load lại data
+    return new Promise(async (resolve) => {
+      try {
+        const { autoSync } = await import("@/services/googleDrive");
+        const { useStore } = await import("@/stores");
+        const { useToastStore } = await import("@/stores/toast.store");
+        const { storageService } = await import("@/services/storage.service");
+        
+        const store = useStore();
+        const toastStore = useToastStore();
+        
+        const synced = await autoSync(async (data) => {
+          if (data && data.accounts && data.categories && data.transactions) {
+            storageService.setItem("accounts", data.accounts);
+            storageService.setItem("categories", data.categories);
+            storageService.setItem("transactions", data.transactions);
+            await store.initialize();
+            toastStore.show("Đã làm mới dữ liệu thành công!", "success");
+          }
+        });
+        
+        if (!synced) {
+           toastStore.show("Dữ liệu đã ở trạng thái mới nhất", "info");
+        }
+      } catch (error) {
+        console.error("Lỗi khi pull to refresh:", error);
+      } finally {
+        resolve();
+      }
+    });
   },
 });
 
