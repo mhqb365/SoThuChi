@@ -4,7 +4,7 @@
       <router-link class="navbar-brand" to="/">Sổ Thu Chi</router-link>
       <CNavbarToggler @click="visible = !visible" />
       <CCollapse class="navbar-collapse" :visible="visible">
-        <CNavbarNav>
+        <CNavbarNav class="me-auto">
           <CNavItem>
             <router-link
               class="nav-link"
@@ -56,6 +56,11 @@
             </router-link>
           </CNavItem>
         </CNavbarNav>
+        <div class="d-flex mt-2 mt-lg-0">
+          <CButton color="primary" @click="$emit('show-create-transaction')">
+            Thêm Giao Dịch
+          </CButton>
+        </div>
       </CCollapse>
     </CContainer>
   </CNavbar>
@@ -64,6 +69,7 @@
 <script setup>
 import { ref } from "vue";
 const visible = ref(false);
+defineEmits(["show-create-transaction"]);
 </script>
 
 <style scoped>

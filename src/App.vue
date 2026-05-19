@@ -3,7 +3,7 @@
     <transition name="fade">
       <SplashScreen v-if="loading" />
     </transition>
-    <HeadMenu />
+    <HeadMenu @show-create-transaction="showTransactionModal = true" />
     <div class="main-content">
       <router-view></router-view>
     </div>
