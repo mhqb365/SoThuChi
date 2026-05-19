@@ -1,11 +1,24 @@
 import { reactive } from "vue";
 import { storageService } from "@/services/storage.service";
+import { saveToDrive, isAuthenticated } from "@/services/googleDrive";
 
 const store = reactive({
   accounts: [],
   categories: [],
   transactions: [],
   defaultAccountId: null,
+
+  autoBackup() {
+    if (isAuthenticated.value) {
+      const data = {
+        accounts: this.accounts,
+        categories: this.categories,
+        transactions: this.transactions,
+        exportDate: new Date().toISOString(),
+      };
+      saveToDrive(data).catch((err) => console.error("Auto backup failed:", err));
+    }
+  },
 
   async initialize() {
     this.accounts = storageService.getItem("accounts", []);
@@ -100,6 +113,7 @@ const store = reactive({
     account.id = Date.now().toString();
     this.accounts.push(account);
     storageService.setItem("accounts", this.accounts);
+    this.autoBackup();
   },
 
   updateAccount(account) {
@@ -107,6 +121,7 @@ const store = reactive({
     if (index !== -1) {
       this.accounts[index] = { ...account };
       storageService.setItem("accounts", this.accounts);
+      this.autoBackup();
     } else {
       throw new Error("Tài khoản không tồn tại");
     }
@@ -124,6 +139,7 @@ const store = reactive({
     if (index !== -1) {
       this.accounts.splice(index, 1);
       storageService.setItem("accounts", this.accounts);
+      this.autoBackup();
     }
   },
 
@@ -132,6 +148,7 @@ const store = reactive({
     category.id = Date.now().toString();
     this.categories.push(category);
     storageService.setItem("categories", this.categories);
+    this.autoBackup();
   },
 
   updateCategory(category) {
@@ -139,6 +156,7 @@ const store = reactive({
     if (index !== -1) {
       this.categories[index] = { ...category };
       storageService.setItem("categories", this.categories);
+      this.autoBackup();
     } else {
       throw new Error("Danh mục không tồn tại");
     }
@@ -154,6 +172,7 @@ const store = reactive({
     if (index !== -1) {
       this.categories.splice(index, 1);
       storageService.setItem("categories", this.categories);
+      this.autoBackup();
     }
   },
 
@@ -193,6 +212,7 @@ const store = reactive({
 
     this.transactions.push(transaction);
     storageService.setItem("transactions", this.transactions);
+    this.autoBackup();
   },
 
   updateTransaction(transaction) {
@@ -257,6 +277,7 @@ const store = reactive({
     this.transactions[index] = transaction;
     storageService.setItem("transactions", this.transactions);
     storageService.setItem("accounts", this.accounts);
+    this.autoBackup();
   },
 
   deleteTransaction(id) {
@@ -289,6 +310,7 @@ const store = reactive({
     this.transactions.splice(index, 1);
     storageService.setItem("transactions", this.transactions);
     storageService.setItem("accounts", this.accounts);
+    this.autoBackup();
   },
 
   // Add a new action to set the default account
