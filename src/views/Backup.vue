@@ -8,17 +8,8 @@
     <CCard class="my-3">
       <CCardBody>
         <h5 class="mb-3 d-flex align-items-center">
-          <svg
-            class="me-2 text-primary"
-            style="width: 24px; height: 24px"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14C0,17.31 2.69,20 6,20H19C21.76,20 24,17.76 24,15C24,12.36 21.95,10.22 19.35,10.03Z"
-            />
-          </svg>
-          Đồng bộ đám mây (Firebase)
+          <Cloud class="me-2" :size="26" />
+          Đồng bộ Firebase
         </h5>
 
         <div v-if="initError" class="alert alert-danger">
@@ -27,21 +18,21 @@
 
         <div v-else-if="!isAuthenticated">
           <p class="text-medium-emphasis">
-            Đăng nhập để tự động sao lưu dữ liệu an toàn trên đám mây Firebase. Phiên đăng nhập được duy trì lâu dài.
+            Đăng nhập để tự động sao lưu dữ liệu an toàn trên đám mây Firebase
           </p>
           <CButton
-            color="primary"
+            color="warning"
             :disabled="!isInitialized"
             @click="handleLogin"
           >
-            Đăng nhập Google (Firebase Auth)
+            Đăng nhập Google Firebase
           </CButton>
         </div>
 
         <div v-else>
           <p class="text-medium-emphasis mb-2">
-            <strong>Đã kết nối tài khoản Firebase</strong>.
-            <a href="#" class="text-danger ms-2" @click.prevent="handleLogout">
+            <strong>Đã kết nối Google Firebase</strong> |
+            <a href="#" class="text-danger" @click.prevent="handleLogout">
               Đăng xuất
             </a>
           </p>
@@ -58,7 +49,7 @@
               :disabled="isSyncing"
               @click="handleSaveToDrive"
             >
-              {{ isSyncing ? "Đang xử lý..." : "Sao lưu lên Firebase" }}
+              {{ isSyncing ? "Đang xử lý..." : "Sao lưu" }}
             </CButton>
             <CButton
               color="info"
@@ -66,7 +57,7 @@
               :disabled="isSyncing"
               @click="handleLoadFromDrive"
             >
-              {{ isSyncing ? "Đang xử lý..." : "Khôi phục từ Firebase" }}
+              {{ isSyncing ? "Đang xử lý..." : "Khôi phục" }}
             </CButton>
           </div>
         </div>
@@ -78,6 +69,7 @@
 <script setup>
 import { useStore } from "@/stores";
 import { storageService } from "@/services/storage.service";
+import { Cloud } from "@lucide/vue";
 import {
   isAuthenticated,
   isInitialized,

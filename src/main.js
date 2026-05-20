@@ -4,7 +4,6 @@ import App from "@/App.vue";
 import router from "@/router";
 
 import CoreUIComponents from "@/plugins/coreui-components";
-import CoreUIIcons from "@/plugins/coreui-icons";
 import { registerSW } from "virtual:pwa-register";
 
 import PullToRefresh from "pulltorefreshjs";
@@ -59,7 +58,6 @@ PullToRefresh.init({
 });
 
 app.use(CoreUIComponents);
-app.use(CoreUIIcons);
 
 app.mount("#app");
 

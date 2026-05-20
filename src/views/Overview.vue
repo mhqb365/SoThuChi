@@ -26,7 +26,7 @@
                 </h4>
               </div>
               <div class="text-success">
-                <CIcon icon="cilArrowTop" size="xl" />
+                <TrendingUp :size="28" />
               </div>
             </div>
           </CCardBody>
@@ -43,7 +43,7 @@
                 </h4>
               </div>
               <div class="text-danger">
-                <CIcon icon="cilArrowBottom" size="xl" />
+                <TrendingDown :size="28" />
               </div>
             </div>
           </CCardBody>
@@ -58,7 +58,7 @@
                 <h4 class="mb-0">{{ filteredTransactions.length }}</h4>
               </div>
               <div class="text-info">
-                <CIcon icon="cilList" size="xl" />
+                <List :size="28" />
               </div>
             </div>
           </CCardBody>
@@ -204,6 +204,7 @@ import { useStore } from "@/stores";
 import { useRouter } from "vue-router";
 import DateRange from "@/components/DateRange.vue";
 import moment from "moment";
+import { TrendingUp, TrendingDown, List } from "@lucide/vue";
 
 const store = useStore();
 const router = useRouter();
