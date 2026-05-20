@@ -4,7 +4,7 @@
       <h4 class="mb-0">Sao Lưu & Khôi Phục</h4>
     </div>
 
-    <!-- Google Drive Backup -->
+    <!-- Firebase Backup -->
     <CCard class="my-3">
       <CCardBody>
         <h5 class="mb-3 d-flex align-items-center">
@@ -18,7 +18,7 @@
               d="M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14C0,17.31 2.69,20 6,20H19C21.76,20 24,17.76 24,15C24,12.36 21.95,10.22 19.35,10.03Z"
             />
           </svg>
-          Google Drive
+          Đồng bộ đám mây (Firebase)
         </h5>
 
         <div v-if="initError" class="alert alert-danger">
@@ -27,20 +27,20 @@
 
         <div v-else-if="!isAuthenticated">
           <p class="text-medium-emphasis">
-            Đăng nhập để đồng bộ dữ liệu an toàn trên đám mây.
+            Đăng nhập để tự động sao lưu dữ liệu an toàn trên đám mây Firebase. Phiên đăng nhập được duy trì lâu dài.
           </p>
           <CButton
             color="primary"
             :disabled="!isInitialized"
             @click="handleLogin"
           >
-            Đăng nhập bằng Google
+            Đăng nhập Google (Firebase Auth)
           </CButton>
         </div>
 
         <div v-else>
           <p class="text-medium-emphasis mb-2">
-            <strong>Đã kết nối Google Drive</strong>.
+            <strong>Đã kết nối tài khoản Firebase</strong>.
             <a href="#" class="text-danger ms-2" @click.prevent="handleLogout">
               Đăng xuất
             </a>
@@ -58,7 +58,7 @@
               :disabled="isSyncing"
               @click="handleSaveToDrive"
             >
-              {{ isSyncing ? "Đang xử lý..." : "Sao lưu lên Drive" }}
+              {{ isSyncing ? "Đang xử lý..." : "Sao lưu lên Firebase" }}
             </CButton>
             <CButton
               color="info"
@@ -66,7 +66,7 @@
               :disabled="isSyncing"
               @click="handleLoadFromDrive"
             >
-              {{ isSyncing ? "Đang xử lý..." : "Khôi phục từ Drive" }}
+              {{ isSyncing ? "Đang xử lý..." : "Khôi phục từ Firebase" }}
             </CButton>
           </div>
         </div>
@@ -86,9 +86,9 @@ import {
   initError,
   login,
   logout,
-  saveToDrive,
-  loadFromDrive,
-} from "@/services/googleDrive";
+  saveToFirestore,
+  loadFromFirestore,
+} from "@/services/firebase";
 
 const store = useStore();
 
@@ -109,10 +109,10 @@ const handleSaveToDrive = async () => {
       transactions: store.transactions,
       exportDate: new Date().toISOString(),
     };
-    await saveToDrive(data);
-    alert("Đã lưu dữ liệu lên Google Drive thành công!");
+    await saveToFirestore(data);
+    alert("Đã lưu dữ liệu lên Firebase thành công!");
   } catch (error) {
-    alert("Có lỗi khi lưu lên Drive: " + error.message);
+    alert("Có lỗi khi lưu lên Firebase: " + error.message);
   }
 };
 
@@ -122,9 +122,9 @@ const handleLoadFromDrive = async () => {
   }
 
   try {
-    const data = await loadFromDrive();
+    const data = await loadFromFirestore();
     if (!data || !data.accounts || !data.categories || !data.transactions) {
-      throw new Error("Dữ liệu từ Drive không hợp lệ hoặc trống");
+      throw new Error("Dữ liệu từ Firebase không hợp lệ hoặc trống");
     }
 
     // Import data
@@ -135,9 +135,9 @@ const handleLoadFromDrive = async () => {
     // Reload data in store
     await store.initialize();
 
-    alert("Đã khôi phục dữ liệu từ Google Drive thành công!");
+    alert("Đã khôi phục dữ liệu từ Firebase thành công!");
   } catch (error) {
-    alert("Có lỗi khi tải từ Drive: " + error.message);
+    alert("Có lỗi khi tải từ Firebase: " + error.message);
   }
 };
 </script>

@@ -4,6 +4,7 @@ import path from "path";
 import vitePWA from "./src/plugins/vite-pwa";
 
 export default defineConfig({
+  base: "./",
   plugins: [vue(), vitePWA],
   resolve: {
     alias: [
@@ -32,5 +33,9 @@ export default defineConfig({
       ".css",
       ".scss",
     ],
+  },
+  build: {
+    outDir: "docs",
+    emptyOutDir: true,
   },
 });

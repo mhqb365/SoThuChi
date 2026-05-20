@@ -28,7 +28,7 @@ PullToRefresh.init({
   onRefresh() {
     return new Promise(async (resolve) => {
       try {
-        const { autoSync } = await import("@/services/googleDrive");
+        const { autoSync } = await import("@/services/firebase");
         const { useStore } = await import("@/stores");
         const { useToastStore } = await import("@/stores/toast.store");
         const { storageService } = await import("@/services/storage.service");

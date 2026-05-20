@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import { storageService } from "@/services/storage.service";
-import { saveToDrive, isAuthenticated } from "@/services/googleDrive";
+import { saveToFirestore, isAuthenticated } from "@/services/firebase";
 
 const store = reactive({
   accounts: [],
@@ -16,7 +16,7 @@ const store = reactive({
         transactions: this.transactions,
         exportDate: new Date().toISOString(),
       };
-      saveToDrive(data).catch((err) =>
+      saveToFirestore(data).catch((err) =>
         console.error("Auto backup failed:", err),
       );
     }
