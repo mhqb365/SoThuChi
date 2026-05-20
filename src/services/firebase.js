@@ -100,8 +100,11 @@ export async function saveToFirestore(data) {
   isSyncing.value = true;
   try {
     const userDocRef = doc(db, "users_data", currentUser.value.uid);
+    // Sanitize data to remove undefined properties (which Firestore does not support)
+    // and strip any Vue reactive proxies.
+    const sanitizedData = JSON.parse(JSON.stringify(data));
     const payload = {
-      ...data,
+      ...sanitizedData,
       updatedAt: new Date().toISOString(),
     };
     await setDoc(userDocRef, payload);
