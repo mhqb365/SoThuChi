@@ -6,7 +6,7 @@
         "dev": "vite --mode development",
         "build": "vite build --mode production",
         "preview": "vite preview --mode production",
-        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+        "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix",
         "format": "prettier --write src/"
     },
     "dependencies": {

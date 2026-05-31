@@ -47,10 +47,7 @@ watch(isAuthenticated, async (loggedIn) => {
         storageService.setItem("categories", data.categories);
         storageService.setItem("transactions", data.transactions);
         await store.initialize();
-        toastStore.show(
-          "Đã đồng bộ dữ liệu mới nhất từ Firebase!",
-          "success",
-        );
+        toastStore.show("Đã đồng bộ dữ liệu mới nhất từ Firebase!", "success");
       }
     });
   }

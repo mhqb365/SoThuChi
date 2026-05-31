@@ -30,46 +30,72 @@
       </CCardBody>
     </CCard>
 
-    <CCard
+    <div
       v-for="account in store.accounts"
       :key="account.id"
-      class="my-3 cursor-pointer account-item"
-      @click="viewAccountTransactions(account.id)"
+      class="account-swipe-row my-3"
     >
-      <CCardBody>
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="mb-1">{{ account.name }}</h5>
-            <div class="text-medium-emphasis">{{ account.description }}</div>
+      <div class="swipe-actions">
+        <CButton
+          color="primary"
+          class="swipe-action"
+          @click.stop="editAccount(account)"
+        >
+          Sửa
+        </CButton>
+        <CButton
+          color="danger"
+          class="swipe-action"
+          @click.stop="deleteAccount(account)"
+        >
+          Xóa
+        </CButton>
+      </div>
+      <CCard
+        class="cursor-pointer account-item"
+        :class="{ 'is-swiped': activeSwipeAccountId === account.id }"
+        @click="handleAccountClick(account)"
+        @touchstart.passive="handleTouchStart($event, account.id)"
+        @touchmove.passive="handleTouchMove($event)"
+        @touchend="handleTouchEnd(account.id)"
+      >
+        <CCardBody>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-1">{{ account.name }}</h5>
+              <div class="text-medium-emphasis">{{ account.description }}</div>
+            </div>
+            <div class="d-flex align-items-center">
+              <h4
+                class="mb-0 me-3"
+                :class="{ 'text-danger': account.balance < 0 }"
+              >
+                {{ account.balance.toLocaleString() }}đ
+              </h4>
+              <div class="desktop-account-actions">
+                <CButton
+                  color="primary"
+                  variant="ghost"
+                  size="sm"
+                  class="me-2"
+                  @click.stop="openAccountModal(account)"
+                >
+                  Sửa
+                </CButton>
+                <CButton
+                  color="danger"
+                  variant="ghost"
+                  size="sm"
+                  @click.stop="confirmDelete(account)"
+                >
+                  Xóa
+                </CButton>
+              </div>
+            </div>
           </div>
-          <div class="d-flex align-items-center">
-            <h4
-              class="mb-0 me-3"
-              :class="{ 'text-danger': account.balance < 0 }"
-            >
-              {{ account.balance.toLocaleString() }}đ
-            </h4>
-            <CButton
-              color="primary"
-              variant="ghost"
-              size="sm"
-              class="me-2"
-              @click.stop="openAccountModal(account)"
-            >
-              Sửa
-            </CButton>
-            <CButton
-              color="danger"
-              variant="ghost"
-              size="sm"
-              @click.stop="confirmDelete(account)"
-            >
-              Xóa
-            </CButton>
-          </div>
-        </div>
-      </CCardBody>
-    </CCard>
+        </CCardBody>
+      </CCard>
+    </div>
 
     <!-- Account Modal (Add/Edit) -->
     <CModal
@@ -167,6 +193,11 @@ const showConfirmModal = ref(false);
 const accountToDelete = ref({ id: null, name: "" });
 const isEditMode = ref(false);
 const isDefaultAccount = ref(false);
+const activeSwipeAccountId = ref(null);
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const touchDeltaX = ref(0);
+const suppressClick = ref(false);
 
 // Computed property for total balance
 const totalBalance = computed(() => {
@@ -191,7 +222,9 @@ const openAccountModal = (account = null) => {
     // Edit mode
     accountForm.value = {
       ...account,
-      type: store.isCreditAccount(account) ? "credit" : account.type || "regular",
+      type: store.isCreditAccount(account)
+        ? "credit"
+        : account.type || "regular",
     };
     isEditMode.value = true;
     // Check if this account is the default
@@ -249,6 +282,16 @@ const confirmDelete = (account) => {
   showConfirmModal.value = true;
 };
 
+const editAccount = (account) => {
+  activeSwipeAccountId.value = null;
+  openAccountModal(account);
+};
+
+const deleteAccount = (account) => {
+  activeSwipeAccountId.value = null;
+  confirmDelete(account);
+};
+
 const handleDeleteConfirm = () => {
   try {
     // Check if this account is the default account
@@ -270,13 +313,77 @@ const viewAccountTransactions = (accountId) => {
     query: { account: accountId },
   });
 };
+
+const handleAccountClick = (account) => {
+  if (suppressClick.value) {
+    return;
+  }
+
+  if (activeSwipeAccountId.value === account.id) {
+    activeSwipeAccountId.value = null;
+    return;
+  }
+
+  viewAccountTransactions(account.id);
+};
+
+const handleTouchStart = (event, accountId) => {
+  const touch = event.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchDeltaX.value = 0;
+
+  if (activeSwipeAccountId.value && activeSwipeAccountId.value !== accountId) {
+    activeSwipeAccountId.value = null;
+  }
+};
+
+const handleTouchMove = (event) => {
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - touchStartX.value;
+  const deltaY = touch.clientY - touchStartY.value;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    touchDeltaX.value = deltaX;
+  }
+};
+
+const handleTouchEnd = (accountId) => {
+  if (touchDeltaX.value < -40) {
+    activeSwipeAccountId.value = accountId;
+    suppressNextClick();
+    return;
+  }
+
+  if (touchDeltaX.value > 40 && activeSwipeAccountId.value === accountId) {
+    activeSwipeAccountId.value = null;
+    suppressNextClick();
+  }
+};
+
+const suppressNextClick = () => {
+  suppressClick.value = true;
+  setTimeout(() => {
+    suppressClick.value = false;
+  }, 250);
+};
 </script>
 
 <style scoped>
+.account-swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
 .account-item {
+  position: relative;
+  z-index: 1;
   transition:
     background-color 0.2s ease,
-    transform 0.1s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  will-change: transform;
 }
 
 .account-item:hover {
@@ -287,5 +394,65 @@ const viewAccountTransactions = (accountId) => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.swipe-actions {
+  display: none;
+}
+
+.desktop-account-actions {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 767.98px) {
+  .account-swipe-row {
+    touch-action: pan-y;
+  }
+
+  .swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    display: flex;
+    width: 112px;
+    overflow: hidden;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .swipe-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .desktop-account-actions {
+    display: none;
+  }
+
+  .account-info {
+    min-width: 0;
+  }
+
+  .account-item {
+    margin-bottom: 0;
+  }
+
+  .account-item.is-swiped {
+    transform: translateX(-112px);
+  }
+
+  .account-item:hover {
+    transform: none;
+  }
+
+  .account-item.is-swiped:hover {
+    transform: translateX(-112px);
+  }
 }
 </style>

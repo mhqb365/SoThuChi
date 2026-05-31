@@ -10,82 +10,132 @@
     <!-- Danh mục chi -->
     <div class="fw-bold fs-6">Danh Mục Chi</div>
     <template v-if="expenseCategories.length">
-      <CCard
+      <div
         v-for="category in expenseCategories"
         :key="category.id"
-        class="my-3"
+        class="swipe-row my-3"
       >
-        <CCardBody>
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-1">{{ category.name }}</h5>
-              <div class="text-medium-emphasis">
-                {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+        <div class="swipe-actions">
+          <CButton
+            color="primary"
+            class="swipe-action"
+            @click.stop="editCategory(category)"
+          >
+            Sửa
+          </CButton>
+          <CButton
+            color="danger"
+            class="swipe-action"
+            @click.stop="deleteCategory(category)"
+          >
+            Xóa
+          </CButton>
+        </div>
+        <CCard
+          class="category-item"
+          :class="{ 'is-swiped': activeSwipeCategoryId === category.id }"
+          @click="handleCategoryClick(category.id)"
+          @touchstart.passive="handleTouchStart($event, category.id)"
+          @touchmove.passive="handleTouchMove($event)"
+          @touchend="handleTouchEnd(category.id)"
+        >
+          <CCardBody>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1">{{ category.name }}</h5>
+                <div class="text-medium-emphasis">
+                  {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+                </div>
+              </div>
+              <div class="desktop-actions">
+                <CButton
+                  color="primary"
+                  variant="ghost"
+                  size="sm"
+                  class="me-2"
+                  @click="openCategoryModal(category)"
+                >
+                  Sửa
+                </CButton>
+                <CButton
+                  color="danger"
+                  variant="ghost"
+                  size="sm"
+                  @click="confirmDelete(category)"
+                >
+                  Xóa
+                </CButton>
               </div>
             </div>
-            <div class="d-flex align-items-center">
-              <CButton
-                color="primary"
-                variant="ghost"
-                size="sm"
-                class="me-2"
-                @click="openCategoryModal(category)"
-              >
-                Sửa
-              </CButton>
-              <CButton
-                color="danger"
-                variant="ghost"
-                size="sm"
-                @click="confirmDelete(category)"
-              >
-                Xóa
-              </CButton>
-            </div>
-          </div>
-        </CCardBody>
-      </CCard>
+          </CCardBody>
+        </CCard>
+      </div>
     </template>
     <div v-else class="text-medium-emphasis mb-3">Không có danh mục chi.</div>
 
     <!-- Danh mục thu -->
     <div class="fw-bold fs-6 mb-2 mt-4">Danh Mục Thu</div>
     <template v-if="incomeCategories.length">
-      <CCard
+      <div
         v-for="category in incomeCategories"
         :key="category.id"
-        class="my-3"
+        class="swipe-row my-3"
       >
-        <CCardBody>
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-1">{{ category.name }}</h5>
-              <div class="text-medium-emphasis">
-                {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+        <div class="swipe-actions">
+          <CButton
+            color="primary"
+            class="swipe-action"
+            @click.stop="editCategory(category)"
+          >
+            Sửa
+          </CButton>
+          <CButton
+            color="danger"
+            class="swipe-action"
+            @click.stop="deleteCategory(category)"
+          >
+            Xóa
+          </CButton>
+        </div>
+        <CCard
+          class="category-item"
+          :class="{ 'is-swiped': activeSwipeCategoryId === category.id }"
+          @click="handleCategoryClick(category.id)"
+          @touchstart.passive="handleTouchStart($event, category.id)"
+          @touchmove.passive="handleTouchMove($event)"
+          @touchend="handleTouchEnd(category.id)"
+        >
+          <CCardBody>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1">{{ category.name }}</h5>
+                <div class="text-medium-emphasis">
+                  {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+                </div>
+              </div>
+              <div class="desktop-actions">
+                <CButton
+                  color="primary"
+                  variant="ghost"
+                  size="sm"
+                  class="me-2"
+                  @click="openCategoryModal(category)"
+                >
+                  Sửa
+                </CButton>
+                <CButton
+                  color="danger"
+                  variant="ghost"
+                  size="sm"
+                  @click="confirmDelete(category)"
+                >
+                  Xóa
+                </CButton>
               </div>
             </div>
-            <div class="d-flex align-items-center">
-              <CButton
-                color="primary"
-                variant="ghost"
-                size="sm"
-                class="me-2"
-                @click="openCategoryModal(category)"
-              >
-                Sửa
-              </CButton>
-              <CButton
-                color="danger"
-                variant="ghost"
-                size="sm"
-                @click="confirmDelete(category)"
-              >
-                Xóa
-              </CButton>
-            </div>
-          </div>
-        </CCardBody>
-      </CCard>
+          </CCardBody>
+        </CCard>
+      </div>
     </template>
     <div v-else class="text-medium-emphasis mb-3">Không có danh mục thu.</div>
 
@@ -160,6 +210,11 @@ const showCategoryModal = ref(false);
 const showConfirmModal = ref(false);
 const isEditMode = ref(false);
 const categoryToDelete = ref({ id: null, name: "" });
+const activeSwipeCategoryId = ref(null);
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const touchDeltaX = ref(0);
+const suppressClick = ref(false);
 
 const defaultCategoryForm = {
   id: null,
@@ -213,6 +268,16 @@ const confirmDelete = (category) => {
   showConfirmModal.value = true;
 };
 
+const editCategory = (category) => {
+  activeSwipeCategoryId.value = null;
+  openCategoryModal(category);
+};
+
+const deleteCategory = (category) => {
+  activeSwipeCategoryId.value = null;
+  confirmDelete(category);
+};
+
 const handleDeleteConfirm = () => {
   try {
     store.deleteCategory(categoryToDelete.value.id);
@@ -232,4 +297,114 @@ const incomeCategories = computed(() =>
     .filter((cat) => cat.type === "income")
     .sort((a, b) => a.name.localeCompare(b.name)),
 );
+
+const handleCategoryClick = (id) => {
+  if (suppressClick.value) {
+    return;
+  }
+
+  if (activeSwipeCategoryId.value === id) {
+    activeSwipeCategoryId.value = null;
+  }
+};
+
+const handleTouchStart = (event, id) => {
+  const touch = event.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchDeltaX.value = 0;
+
+  if (activeSwipeCategoryId.value && activeSwipeCategoryId.value !== id) {
+    activeSwipeCategoryId.value = null;
+  }
+};
+
+const handleTouchMove = (event) => {
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - touchStartX.value;
+  const deltaY = touch.clientY - touchStartY.value;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    touchDeltaX.value = deltaX;
+  }
+};
+
+const handleTouchEnd = (id) => {
+  if (touchDeltaX.value < -40) {
+    activeSwipeCategoryId.value = id;
+    suppressNextClick();
+    return;
+  }
+
+  if (touchDeltaX.value > 40 && activeSwipeCategoryId.value === id) {
+    activeSwipeCategoryId.value = null;
+    suppressNextClick();
+  }
+};
+
+const suppressNextClick = () => {
+  suppressClick.value = true;
+  setTimeout(() => {
+    suppressClick.value = false;
+  }, 250);
+};
 </script>
+
+<style scoped>
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.category-item {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.swipe-actions {
+  display: none;
+}
+
+.desktop-actions {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 767.98px) {
+  .swipe-row {
+    touch-action: pan-y;
+  }
+
+  .swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    display: flex;
+    width: 112px;
+    overflow: hidden;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .swipe-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .desktop-actions {
+    display: none;
+  }
+
+  .category-item.is-swiped {
+    transform: translateX(-112px);
+  }
+}
+</style>

@@ -53,68 +53,95 @@
       <div class="fw-bold fs-6 text-primary">
         {{ formatDateHeader(date) }}
       </div>
-      <CCard
+      <div
         v-for="transaction in transactions"
         :key="transaction.id"
-        class="my-3"
+        class="swipe-row my-3"
       >
-        <CCardBody>
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-1">
-                {{
-                  transaction.type === "transfer"
-                    ? `${getAccountName(
-                        transaction.fromAccount,
-                      )} → ${getAccountName(transaction.toAccount)}`
-                    : transaction.description
-                }}
-              </h5>
-              <div class="text-muted">
-                {{ formatDateTime(transaction.date) }}<br />
-                {{ getTransactionDateTime(transaction) }}
+        <div class="swipe-actions">
+          <CButton
+            color="primary"
+            class="swipe-action"
+            @click.stop="editTransaction(transaction)"
+          >
+            Sửa
+          </CButton>
+          <CButton
+            color="danger"
+            class="swipe-action"
+            @click.stop="deleteTransaction(transaction.id)"
+          >
+            Xóa
+          </CButton>
+        </div>
+        <CCard
+          class="transaction-item"
+          :class="{ 'is-swiped': activeSwipeTransactionId === transaction.id }"
+          @click="handleTransactionClick(transaction.id)"
+          @touchstart.passive="handleTouchStart($event, transaction.id)"
+          @touchmove.passive="handleTouchMove($event)"
+          @touchend="handleTouchEnd(transaction.id)"
+        >
+          <CCardBody>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1">
+                  {{
+                    transaction.type === "transfer"
+                      ? `${getAccountName(
+                          transaction.fromAccount,
+                        )} → ${getAccountName(transaction.toAccount)}`
+                      : transaction.description
+                  }}
+                </h5>
+                <div class="text-muted">
+                  {{ formatDateTime(transaction.date) }}<br />
+                  {{ getTransactionDateTime(transaction) }}
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <h5
+                  class="mb-0 me-3"
+                  :class="{
+                    'text-success':
+                      transaction.type === 'income' ||
+                      transaction.type === 'credit_payment',
+                    'text-danger': transaction.type === 'expense',
+                  }"
+                >
+                  {{
+                    transaction.type === "income" ||
+                    transaction.type === "credit_payment"
+                      ? "+"
+                      : transaction.type === "expense"
+                        ? "-"
+                        : ""
+                  }}{{ transaction.amount.toLocaleString() }}đ
+                </h5>
+                <div class="desktop-actions">
+                  <CButton
+                    color="primary"
+                    variant="ghost"
+                    size="sm"
+                    class="me-2"
+                    @click="handleEdit(transaction)"
+                  >
+                    Sửa
+                  </CButton>
+                  <CButton
+                    color="danger"
+                    variant="ghost"
+                    size="sm"
+                    @click="handleDelete(transaction.id)"
+                  >
+                    Xóa
+                  </CButton>
+                </div>
               </div>
             </div>
-            <div class="d-flex align-items-center">
-              <h5
-                class="mb-0 me-3"
-                :class="{
-                  'text-success':
-                    transaction.type === 'income' ||
-                    transaction.type === 'credit_payment',
-                  'text-danger': transaction.type === 'expense',
-                }"
-              >
-                {{
-                  transaction.type === "income" ||
-                  transaction.type === "credit_payment"
-                    ? "+"
-                    : transaction.type === "expense"
-                      ? "-"
-                      : ""
-                }}{{ transaction.amount.toLocaleString() }}đ
-              </h5>
-              <CButton
-                color="primary"
-                variant="ghost"
-                size="sm"
-                class="me-2"
-                @click="handleEdit(transaction)"
-              >
-                Sửa
-              </CButton>
-              <CButton
-                color="danger"
-                variant="ghost"
-                size="sm"
-                @click="handleDelete(transaction.id)"
-              >
-                Xóa
-              </CButton>
-            </div>
-          </div>
-        </CCardBody>
-      </CCard>
+          </CCardBody>
+        </CCard>
+      </div>
     </template>
 
     <!-- Replace Add Transaction Modal with component -->
@@ -153,6 +180,11 @@ const showEditModal = ref(false);
 const selectedTransaction = ref(null);
 const selectedCategoryId = ref(null);
 const selectedAccountId = ref(null);
+const activeSwipeTransactionId = ref(null);
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const touchDeltaX = ref(0);
+const suppressClick = ref(false);
 const dateRange = ref({
   start: null,
   end: null,
@@ -362,6 +394,16 @@ const handleEdit = (transaction) => {
   showEditModal.value = true;
 };
 
+const editTransaction = (transaction) => {
+  activeSwipeTransactionId.value = null;
+  handleEdit(transaction);
+};
+
+const deleteTransaction = (id) => {
+  activeSwipeTransactionId.value = null;
+  handleDelete(id);
+};
+
 const handleDelete = async (id) => {
   try {
     if (!confirm("Bạn có chắc chắn muốn xóa giao dịch này?")) {
@@ -374,4 +416,113 @@ const handleDelete = async (id) => {
     alert(error.message || "Có lỗi xảy ra khi xóa giao dịch");
   }
 };
+const handleTransactionClick = (id) => {
+  if (suppressClick.value) {
+    return;
+  }
+
+  if (activeSwipeTransactionId.value === id) {
+    activeSwipeTransactionId.value = null;
+  }
+};
+
+const handleTouchStart = (event, id) => {
+  const touch = event.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchDeltaX.value = 0;
+
+  if (activeSwipeTransactionId.value && activeSwipeTransactionId.value !== id) {
+    activeSwipeTransactionId.value = null;
+  }
+};
+
+const handleTouchMove = (event) => {
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - touchStartX.value;
+  const deltaY = touch.clientY - touchStartY.value;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    touchDeltaX.value = deltaX;
+  }
+};
+
+const handleTouchEnd = (id) => {
+  if (touchDeltaX.value < -40) {
+    activeSwipeTransactionId.value = id;
+    suppressNextClick();
+    return;
+  }
+
+  if (touchDeltaX.value > 40 && activeSwipeTransactionId.value === id) {
+    activeSwipeTransactionId.value = null;
+    suppressNextClick();
+  }
+};
+
+const suppressNextClick = () => {
+  suppressClick.value = true;
+  setTimeout(() => {
+    suppressClick.value = false;
+  }, 250);
+};
 </script>
+
+<style scoped>
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.transaction-item {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.swipe-actions {
+  display: none;
+}
+
+.desktop-actions {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 767.98px) {
+  .swipe-row {
+    touch-action: pan-y;
+  }
+
+  .swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    display: flex;
+    width: 112px;
+    overflow: hidden;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .swipe-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .desktop-actions {
+    display: none;
+  }
+
+  .transaction-item.is-swiped {
+    transform: translateX(-112px);
+  }
+}
+</style>

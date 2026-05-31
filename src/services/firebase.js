@@ -7,12 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -165,7 +160,11 @@ export async function autoSync(onRestore) {
     // If cloud is newer (10s buffer), or if we don't have local sync record
     if (cloudTime > localTime + 10000 || !lastSyncTime.value) {
       console.log("Firebase content is newer. Downloading...");
-      if (cloudData.accounts && cloudData.categories && cloudData.transactions) {
+      if (
+        cloudData.accounts &&
+        cloudData.categories &&
+        cloudData.transactions
+      ) {
         onRestore(cloudData);
         updateLastSyncTime();
         return true;
