@@ -236,8 +236,17 @@ const filteredTransactions = computed(() => {
     });
   }
 
-  // Loại bỏ giao dịch chuyển khoản
-  return filtered.filter((t) => t.type !== "transfer");
+  return filtered.filter((transaction) => {
+    if (transaction.type === "credit_payment") {
+      return false;
+    }
+
+    if (transaction.type === "transfer") {
+      return false;
+    }
+
+    return !store.isCreditAccount(transaction.accountId);
+  });
 });
 
 // Tính tổng thu nhập

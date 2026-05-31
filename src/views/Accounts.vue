@@ -103,6 +103,15 @@
             class="mb-3"
             label="Mô Tả"
           />
+          <CFormSelect
+            v-model="accountForm.type"
+            class="mb-3"
+            label="Loại Tài Khoản"
+            :options="[
+              { label: 'Tài khoản thường', value: 'regular' },
+              { label: 'Thẻ tín dụng', value: 'credit' },
+            ]"
+          />
 
           <CFormCheck
             id="defaultAccountCheckbox"
@@ -161,7 +170,9 @@ const isDefaultAccount = ref(false);
 
 // Computed property for total balance
 const totalBalance = computed(() => {
-  return store.accounts.reduce((total, account) => total + account.balance, 0);
+  return store.accounts
+    .filter((account) => !store.isCreditAccount(account))
+    .reduce((total, account) => total + account.balance, 0);
 });
 
 const defaultAccountForm = {
@@ -169,6 +180,7 @@ const defaultAccountForm = {
   name: "",
   description: "",
   balance: 0,
+  type: "regular",
 };
 
 const accountForm = ref({ ...defaultAccountForm });
@@ -177,7 +189,10 @@ const accountForm = ref({ ...defaultAccountForm });
 const openAccountModal = (account = null) => {
   if (account) {
     // Edit mode
-    accountForm.value = { ...account };
+    accountForm.value = {
+      ...account,
+      type: store.isCreditAccount(account) ? "credit" : account.type || "regular",
+    };
     isEditMode.value = true;
     // Check if this account is the default
     isDefaultAccount.value = store.defaultAccountId === account.id.toString();

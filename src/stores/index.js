@@ -2,6 +2,11 @@ import { reactive } from "vue";
 import { storageService } from "@/services/storage.service";
 import { saveToFirestore, isAuthenticated } from "@/services/firebase";
 
+const isCreditAccount = (account) => {
+  const name = account?.name?.toLowerCase() || "";
+  return account?.type === "credit" || name.includes("thẻ tín dụng");
+};
+
 const store = reactive({
   accounts: [],
   categories: [],
@@ -20,6 +25,14 @@ const store = reactive({
         console.error("Auto backup failed:", err),
       );
     }
+  },
+
+  isCreditAccount(accountIdOrAccount) {
+    const account =
+      typeof accountIdOrAccount === "object"
+        ? accountIdOrAccount
+        : this.accounts.find((a) => a.id === accountIdOrAccount);
+    return isCreditAccount(account);
   },
 
   async initialize() {
@@ -183,7 +196,15 @@ const store = reactive({
     transaction.id = Date.now().toString();
 
     // Handle balance updates
-    if (transaction.type === "transfer") {
+    if (transaction.type === "credit_payment") {
+      const account = this.accounts.find((a) => a.id === transaction.accountId);
+      if (!account) {
+        throw new Error("Tài khoản không tồn tại");
+      }
+
+      account.balance += transaction.amount;
+      storageService.setItem("accounts", this.accounts);
+    } else if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
         (a) => a.id === transaction.fromAccount,
       );
@@ -226,7 +247,12 @@ const store = reactive({
     }
 
     // Revert old transaction's effect on balances
-    if (oldTransaction.type === "transfer") {
+    if (oldTransaction.type === "credit_payment") {
+      const oldAccount = this.accounts.find(
+        (a) => a.id === oldTransaction.accountId,
+      );
+      oldAccount.balance -= oldTransaction.amount;
+    } else if (oldTransaction.type === "transfer") {
       const oldFromAccount = this.accounts.find(
         (a) => a.id === oldTransaction.fromAccount,
       );
@@ -247,7 +273,14 @@ const store = reactive({
     }
 
     // Apply new transaction's effect on balances
-    if (transaction.type === "transfer") {
+    if (transaction.type === "credit_payment") {
+      const account = this.accounts.find((a) => a.id === transaction.accountId);
+      if (!account) {
+        throw new Error("Tài khoản không tồn tại");
+      }
+
+      account.balance += transaction.amount;
+    } else if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
         (a) => a.id === transaction.fromAccount,
       );
@@ -289,7 +322,10 @@ const store = reactive({
     }
 
     // Revert transaction's effect on balances
-    if (transaction.type === "transfer") {
+    if (transaction.type === "credit_payment") {
+      const account = this.accounts.find((a) => a.id === transaction.accountId);
+      account.balance -= transaction.amount;
+    } else if (transaction.type === "transfer") {
       const fromAccount = this.accounts.find(
         (a) => a.id === transaction.fromAccount,
       );

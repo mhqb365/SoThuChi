@@ -79,12 +79,15 @@
               <h5
                 class="mb-0 me-3"
                 :class="{
-                  'text-success': transaction.type === 'income',
+                  'text-success':
+                    transaction.type === 'income' ||
+                    transaction.type === 'credit_payment',
                   'text-danger': transaction.type === 'expense',
                 }"
               >
                 {{
-                  transaction.type === "income"
+                  transaction.type === "income" ||
+                  transaction.type === "credit_payment"
                     ? "+"
                     : transaction.type === "expense"
                       ? "-"
@@ -175,6 +178,7 @@ const sortedTransactions = computed(() => {
       // Exclude transfer transactions when filtering by category
       return (
         transaction.type !== "transfer" &&
+        transaction.type !== "credit_payment" &&
         transaction.categoryId === selectedCategoryId.value
       );
     });
@@ -331,11 +335,17 @@ const formatDateTime = (dateString) => {
 };
 
 const getTransactionDateTime = (transaction) => {
-  return transaction.type === "transfer"
-    ? ""
-    : `${getAccountName(transaction.accountId)} - ${getCategoryName(
-        transaction.categoryId,
-      )}`;
+  if (transaction.type === "transfer") {
+    return "";
+  }
+
+  if (transaction.type === "credit_payment") {
+    return getAccountName(transaction.accountId);
+  }
+
+  return `${getAccountName(transaction.accountId)} - ${getCategoryName(
+    transaction.categoryId,
+  )}`;
 };
 
 const formatDateHeader = (dateString) => {

@@ -42,5 +42,7 @@ coverage
 .stylelintcache
 
 .agent
+.codex
+AGENTS.md
 GEMINI.md
 ERRORS.md

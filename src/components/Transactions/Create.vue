@@ -28,6 +28,15 @@
             Chuyển Khoản
           </CNavLink>
         </CNavItem>
+        <CNavItem>
+          <CNavLink
+            :active="activeTab === 2"
+            role="button"
+            @click="activeTab = 2"
+          >
+            Thanh toán thẻ
+          </CNavLink>
+        </CNavItem>
       </CNav>
 
       <!-- Tab Content -->
@@ -165,6 +174,44 @@
             </div>
           </CForm>
         </div>
+        <div v-show="activeTab === 2">
+          <CForm @submit.prevent="handleCreditPaymentSubmit">
+            <CFormSelect
+              v-model="creditPaymentForm.accountId"
+              class="mb-3"
+              label="Thẻ tín dụng"
+              :options="[
+                { label: 'Chọn thẻ tín dụng', value: '' },
+                ...creditAccounts.map((acc) => ({
+                  label: `${acc.name} (${acc.balance.toLocaleString()}đ)`,
+                  value: acc.id,
+                })),
+              ]"
+              required
+            />
+            <CFormInput
+              v-model.number="creditPaymentForm.amount"
+              class="mb-3"
+              label="Số Tiền Thanh Toán"
+              type="number"
+              inputmode="numeric"
+              required
+            />
+            <div class="mb-3 d-flex">
+              <CFormInput
+                v-model="creditPaymentForm.dateInput"
+                type="date"
+                required
+                class="me-2"
+              />
+              <CFormInput
+                v-model="creditPaymentForm.timeInput"
+                type="time"
+                required
+              />
+            </div>
+          </CForm>
+        </div>
       </div>
     </CModalBody>
     <CModalFooter>
@@ -172,7 +219,7 @@
         Đóng
       </CButton>
       <CButton color="primary" @click="handleSubmit">
-        {{ activeTab === 0 ? "Thêm" : "Chuyển" }}
+        {{ submitLabel }}
       </CButton>
     </CModalFooter>
   </CModal>
@@ -233,6 +280,22 @@ const transferForm = ref({
   toAccount: "",
   amount: "",
   ...getCurrentDateTime(),
+});
+
+const creditPaymentForm = ref({
+  accountId: "",
+  amount: "",
+  ...getCurrentDateTime(),
+});
+
+const creditAccounts = computed(() =>
+  store.accounts.filter((account) => store.isCreditAccount(account)),
+);
+
+const submitLabel = computed(() => {
+  if (activeTab.value === 0) return "Thêm";
+  if (activeTab.value === 1) return "Chuyển";
+  return "Thanh toán";
 });
 
 const filteredCategories = computed(() => {
@@ -369,11 +432,47 @@ const handleTransferSubmit = async () => {
   }
 };
 
+const handleCreditPaymentSubmit = async () => {
+  try {
+    if (!creditPaymentForm.value.accountId) {
+      throw new Error("Vui lòng chọn thẻ tín dụng");
+    }
+    if (creditPaymentForm.value.amount <= 0) {
+      throw new Error("Số tiền thanh toán phải lớn hơn 0");
+    }
+
+    const date = moment(
+      `${creditPaymentForm.value.dateInput} ${creditPaymentForm.value.timeInput}`,
+      "YYYY-MM-DD HH:mm",
+    );
+
+    await store.addTransaction({
+      type: "credit_payment",
+      accountId: creditPaymentForm.value.accountId.toString(),
+      amount: Number(creditPaymentForm.value.amount),
+      description: "Thanh toán thẻ tín dụng",
+      date: date.toISOString(),
+    });
+
+    emit("update:modelValue", false);
+    creditPaymentForm.value = {
+      accountId: "",
+      amount: "",
+      ...getCurrentDateTime(),
+    };
+  } catch (error) {
+    console.error("Error in handleCreditPaymentSubmit:", error);
+    alert(error.message);
+  }
+};
+
 const handleSubmit = () => {
   if (activeTab.value === 0) {
     handleTransactionSubmit();
-  } else {
+  } else if (activeTab.value === 1) {
     handleTransferSubmit();
+  } else {
+    handleCreditPaymentSubmit();
   }
 };
 </script>

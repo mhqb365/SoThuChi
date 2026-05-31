@@ -2,12 +2,20 @@
   <CModal backdrop="static" :visible="visible" @close="onClose">
     <CModalHeader>
       <CModalTitle>
-        {{ form.type === "transfer" ? "Sửa Chuyển Khoản" : "Sửa Giao Dịch" }}
+        {{
+          form.type === "transfer"
+            ? "Sửa Chuyển Khoản"
+            : form.type === "credit_payment"
+              ? "Sửa Thanh Toán Thẻ"
+              : "Sửa Giao Dịch"
+        }}
       </CModalTitle>
     </CModalHeader>
     <CModalBody>
       <CForm @submit.prevent="handleSubmit">
-        <template v-if="form.type !== 'transfer'">
+        <template
+          v-if="form.type !== 'transfer' && form.type !== 'credit_payment'"
+        >
           <CRow class="mb-3">
             <CCol>
               <CFormSelect
@@ -66,6 +74,29 @@
             v-model="form.description"
             class="mb-3"
             label="Mô Tả"
+            required
+          />
+        </template>
+        <template v-else-if="form.type === 'credit_payment'">
+          <CFormSelect
+            v-model="form.accountId"
+            class="mb-3"
+            label="Thẻ tín dụng"
+            :options="[
+              { label: 'Chọn thẻ tín dụng', value: '' },
+              ...creditAccounts.map((acc) => ({
+                label: `${acc.name} (${acc.balance.toLocaleString()}đ)`,
+                value: acc.id,
+              })),
+            ]"
+            required
+          />
+          <CFormInput
+            v-model.number="form.amount"
+            class="mb-3"
+            label="Số Tiền Thanh Toán"
+            type="number"
+            inputmode="numeric"
             required
           />
         </template>
@@ -169,6 +200,9 @@ watch(
 );
 
 const accounts = computed(() => store.accounts);
+const creditAccounts = computed(() =>
+  store.accounts.filter((account) => store.isCreditAccount(account)),
+);
 
 const filteredCategories = computed(() => {
   return store.categories.filter((cat) => cat.type === form.value.type);
