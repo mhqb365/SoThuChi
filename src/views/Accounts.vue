@@ -1,5 +1,5 @@
 <template>
-  <div class="container-lg py-4">
+  <div class="container-lg py-4" @click="closeActiveSwipe">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="mb-0">Tài Khoản</h4>
       <CButton color="primary" @click="openAccountModal()">
@@ -54,20 +54,20 @@
       <CCard
         class="cursor-pointer account-item"
         :class="{ 'is-swiped': activeSwipeAccountId === account.id }"
-        @click="handleAccountClick(account)"
+        @click.stop="handleAccountClick(account)"
         @touchstart.passive="handleTouchStart($event, account.id)"
         @touchmove.passive="handleTouchMove($event)"
         @touchend="handleTouchEnd(account.id)"
       >
         <CCardBody>
           <div class="d-flex justify-content-between align-items-center">
-            <div>
+            <div class="account-info">
               <h5 class="mb-1">{{ account.name }}</h5>
               <div class="text-medium-emphasis">{{ account.description }}</div>
             </div>
             <div class="d-flex align-items-center">
               <h4
-                class="mb-0 me-3"
+                class="account-balance mb-0 me-3"
                 :class="{ 'text-danger': account.balance < 0 }"
               >
                 {{ account.balance.toLocaleString() }}đ
@@ -324,7 +324,16 @@ const handleAccountClick = (account) => {
     return;
   }
 
+  if (activeSwipeAccountId.value) {
+    activeSwipeAccountId.value = null;
+    return;
+  }
+
   viewAccountTransactions(account.id);
+};
+
+const closeActiveSwipe = () => {
+  activeSwipeAccountId.value = null;
 };
 
 const handleTouchStart = (event, accountId) => {
@@ -379,6 +388,7 @@ const suppressNextClick = () => {
 .account-item {
   position: relative;
   z-index: 1;
+  overflow: hidden;
   transition:
     background-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -403,6 +413,15 @@ const suppressNextClick = () => {
 .desktop-account-actions {
   display: flex;
   align-items: center;
+}
+
+.account-info {
+  min-width: 0;
+}
+
+.account-balance {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 @media (max-width: 767.98px) {
@@ -435,12 +454,9 @@ const suppressNextClick = () => {
     display: none;
   }
 
-  .account-info {
-    min-width: 0;
-  }
-
   .account-item {
     margin-bottom: 0;
+    box-shadow: none;
   }
 
   .account-item.is-swiped {
@@ -448,6 +464,8 @@ const suppressNextClick = () => {
   }
 
   .account-item:hover {
+    background-color: var(--cui-card-bg);
+    box-shadow: none;
     transform: none;
   }
 
