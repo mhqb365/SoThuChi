@@ -1,5 +1,5 @@
 <template>
-  <div class="container-lg py-4" @click="closeActiveSwipe">
+  <div class="container-lg py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="mb-0">Tài Khoản</h4>
       <CButton color="primary" @click="openAccountModal()">
@@ -330,10 +330,6 @@ const handleAccountClick = (account) => {
   }
 
   viewAccountTransactions(account.id);
-};
-
-const closeActiveSwipe = () => {
-  activeSwipeAccountId.value = null;
 };
 
 const handleTouchStart = (event, accountId) => {
