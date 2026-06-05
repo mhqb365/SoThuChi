@@ -15,12 +15,12 @@
 
     <!-- Tổng quan số liệu -->
     <CRow class="my-3">
-      <CCol sm="6" lg="4">
+      <CCol sm="6" lg="3">
         <CCard class="mb-3">
           <CCardBody>
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <div class="text-medium-emphasis">Tổng Thu Nhập</div>
+                <div class="text-medium-emphasis">Thu Nhập</div>
                 <h4 class="text-success mb-0">
                   +{{ totalIncome.toLocaleString() }}đ
                 </h4>
@@ -32,12 +32,12 @@
           </CCardBody>
         </CCard>
       </CCol>
-      <CCol sm="6" lg="4">
+      <CCol sm="6" lg="3">
         <CCard class="mb-3">
           <CCardBody>
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <div class="text-medium-emphasis">Tổng Chi Tiêu</div>
+                <div class="text-medium-emphasis">Chi Tiêu</div>
                 <h4 class="text-danger mb-0">
                   -{{ totalExpense.toLocaleString() }}đ
                 </h4>
@@ -49,12 +49,29 @@
           </CCardBody>
         </CCard>
       </CCol>
-      <CCol sm="6" lg="4">
+      <CCol sm="6" lg="3">
         <CCard class="mb-3">
           <CCardBody>
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <div class="text-medium-emphasis">Số Giao Dịch</div>
+                <div class="text-medium-emphasis">Thẻ Tín Dụng</div>
+                <h4 class="text-warning mb-0">
+                  -{{ totalCreditExpense.toLocaleString() }}đ
+                </h4>
+              </div>
+              <div class="text-warning">
+                <CreditCard :size="28" />
+              </div>
+            </div>
+          </CCardBody>
+        </CCard>
+      </CCol>
+      <CCol sm="6" lg="3">
+        <CCard class="mb-3">
+          <CCardBody>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-medium-emphasis">Giao Dịch</div>
                 <h4 class="mb-0">{{ filteredTransactions.length }}</h4>
               </div>
               <div class="text-info">
@@ -204,7 +221,7 @@ import { useStore } from "@/stores";
 import { useRouter } from "vue-router";
 import DateRange from "@/components/DateRange.vue";
 import moment from "moment";
-import { TrendingUp, TrendingDown, List } from "@lucide/vue";
+import { CreditCard, TrendingUp, TrendingDown, List } from "@lucide/vue";
 
 const store = useStore();
 const router = useRouter();
@@ -261,6 +278,12 @@ const totalExpense = computed(() => {
   return filteredTransactions.value
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
+});
+
+const totalCreditExpense = computed(() => {
+  return store.accounts
+    .filter((account) => store.isCreditAccount(account))
+    .reduce((sum, account) => sum + Math.abs(Math.min(account.balance, 0)), 0);
 });
 
 // Tính số dư ròng
