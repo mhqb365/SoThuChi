@@ -5,7 +5,9 @@
     class="app-navbar d-none d-md-block"
   >
     <CContainer fluid>
-      <router-link class="navbar-brand" to="/">Sổ Thu Chi</router-link>
+      <router-link class="navbar-brand" to="/" aria-label="Sổ Thu Chi">
+        <img class="brand-logo" src="@/assets/logo.png" alt="" />
+      </router-link>
       <CNavbarToggler @click="visible = !visible" />
       <CCollapse class="navbar-collapse" :visible="visible">
         <CNavbarNav class="me-auto">
@@ -85,7 +87,17 @@ defineEmits(["show-create-transaction"]);
 }
 
 .navbar-brand {
-  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+}
+
+.brand-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--coffee-radius-sm);
+  object-fit: cover;
 }
 
 .nav-link {

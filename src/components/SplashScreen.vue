@@ -14,10 +14,16 @@ import splash from "@/assets/logo.png";
 .splash-screen {
   position: fixed;
   inset: 0;
-  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(247, 238, 220, 0.78) 0%,
+      rgba(235, 224, 206, 0) 280px
+    ),
+    var(--coffee-neutral);
   z-index: 9999;
 }
 

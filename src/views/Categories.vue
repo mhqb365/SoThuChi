@@ -1,10 +1,7 @@
 <template>
   <div class="container-lg categories-page py-4">
     <div class="page-header">
-      <div>
-        <div class="page-label">Quản lý dòng tiền</div>
-        <h1 class="page-title">Danh mục</h1>
-      </div>
+      <h4 class="mb-0">Danh mục</h4>
       <CButton
         class="action-button"
         color="primary"
@@ -385,20 +382,12 @@ const suppressNextClick = () => {
   margin-bottom: var(--coffee-space-lg);
 }
 
-.page-label,
 .section-title {
   color: var(--coffee-secondary);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-}
-
-.page-title {
-  margin: 0;
-  font-size: clamp(2rem, 7vw, 3.6rem);
-  letter-spacing: 0;
-  line-height: 1;
 }
 
 .action-button,

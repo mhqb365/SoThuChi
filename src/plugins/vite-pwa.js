@@ -7,8 +7,8 @@ export default VitePWA({
     name: "Sổ Thu Chi",
     short_name: "Sổ Thu Chi",
     description: "Ứng dụng quản lý thu chi cá nhân",
-    theme_color: "#ffffff",
-    background_color: "#ffffff",
+    theme_color: "#ebe0ce",
+    background_color: "#ebe0ce",
     display: "standalone",
     start_url: "/",
     icons: [
