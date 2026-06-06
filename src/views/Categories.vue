@@ -1,34 +1,44 @@
 <template>
-  <div class="container-lg py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 class="mb-0">Danh Mục</h4>
-      <CButton color="primary" @click="openCategoryModal()">
-        Thêm Danh Mục
+  <div class="container-lg categories-page py-4">
+    <div class="page-header">
+      <div>
+        <div class="page-label">Quản lý dòng tiền</div>
+        <h1 class="page-title">Danh mục</h1>
+      </div>
+      <CButton
+        class="action-button"
+        color="primary"
+        @click="openCategoryModal()"
+      >
+        <Plus :size="18" aria-hidden="true" />
+        <span>Thêm danh mục</span>
       </CButton>
     </div>
 
-    <!-- Danh mục chi -->
-    <div class="fw-bold fs-6">Danh Mục Chi</div>
+    <div class="section-title">Danh mục chi</div>
     <template v-if="expenseCategories.length">
       <div
         v-for="category in expenseCategories"
         :key="category.id"
         class="swipe-row my-3"
       >
-        <div class="swipe-actions">
+        <div
+          class="swipe-actions"
+          :class="{ 'is-visible': activeSwipeCategoryId === category.id }"
+        >
           <CButton
             color="primary"
             class="swipe-action"
             @click.stop="editCategory(category)"
           >
-            Sửa
+            <Pencil :size="16" aria-hidden="true" />
           </CButton>
           <CButton
             color="danger"
             class="swipe-action"
             @click.stop="deleteCategory(category)"
           >
-            Xóa
+            <Trash2 :size="16" aria-hidden="true" />
           </CButton>
         </div>
         <CCard
@@ -40,11 +50,16 @@
           @touchend="handleTouchEnd(category.id)"
         >
           <CCardBody>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="mb-1">{{ category.name }}</h5>
-                <div class="text-medium-emphasis">
-                  {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+            <div class="category-row">
+              <div class="category-content">
+                <div class="category-icon">
+                  <Tag :size="18" aria-hidden="true" />
+                </div>
+                <div>
+                  <h5 class="mb-1">{{ category.name }}</h5>
+                  <div class="category-type-badge">
+                    {{ category.type === "income" ? "Thu nhập" : "Chi tiêu" }}
+                  </div>
                 </div>
               </div>
               <div class="desktop-actions">
@@ -52,18 +67,21 @@
                   color="primary"
                   variant="ghost"
                   size="sm"
-                  class="me-2"
+                  class="icon-text-button me-2"
                   @click="openCategoryModal(category)"
                 >
-                  Sửa
+                  <Pencil :size="15" aria-hidden="true" />
+                  <span>Sửa</span>
                 </CButton>
                 <CButton
                   color="danger"
                   variant="ghost"
                   size="sm"
+                  class="icon-text-button"
                   @click="confirmDelete(category)"
                 >
-                  Xóa
+                  <Trash2 :size="15" aria-hidden="true" />
+                  <span>Xóa</span>
                 </CButton>
               </div>
             </div>
@@ -71,30 +89,32 @@
         </CCard>
       </div>
     </template>
-    <div v-else class="text-medium-emphasis mb-3">Không có danh mục chi.</div>
+    <div v-else class="empty-state">Không có danh mục chi.</div>
 
-    <!-- Danh mục thu -->
-    <div class="fw-bold fs-6 mb-2 mt-4">Danh Mục Thu</div>
+    <div class="section-title mt-4">Danh mục thu</div>
     <template v-if="incomeCategories.length">
       <div
         v-for="category in incomeCategories"
         :key="category.id"
         class="swipe-row my-3"
       >
-        <div class="swipe-actions">
+        <div
+          class="swipe-actions"
+          :class="{ 'is-visible': activeSwipeCategoryId === category.id }"
+        >
           <CButton
             color="primary"
             class="swipe-action"
             @click.stop="editCategory(category)"
           >
-            Sửa
+            <Pencil :size="16" aria-hidden="true" />
           </CButton>
           <CButton
             color="danger"
             class="swipe-action"
             @click.stop="deleteCategory(category)"
           >
-            Xóa
+            <Trash2 :size="16" aria-hidden="true" />
           </CButton>
         </div>
         <CCard
@@ -106,11 +126,16 @@
           @touchend="handleTouchEnd(category.id)"
         >
           <CCardBody>
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="mb-1">{{ category.name }}</h5>
-                <div class="text-medium-emphasis">
-                  {{ category.type === "income" ? "Thu Nhập" : "Chi Tiêu" }}
+            <div class="category-row">
+              <div class="category-content">
+                <div class="category-icon">
+                  <Tag :size="18" aria-hidden="true" />
+                </div>
+                <div>
+                  <h5 class="mb-1">{{ category.name }}</h5>
+                  <div class="category-type-badge">
+                    {{ category.type === "income" ? "Thu nhập" : "Chi tiêu" }}
+                  </div>
                 </div>
               </div>
               <div class="desktop-actions">
@@ -118,18 +143,21 @@
                   color="primary"
                   variant="ghost"
                   size="sm"
-                  class="me-2"
+                  class="icon-text-button me-2"
                   @click="openCategoryModal(category)"
                 >
-                  Sửa
+                  <Pencil :size="15" aria-hidden="true" />
+                  <span>Sửa</span>
                 </CButton>
                 <CButton
                   color="danger"
                   variant="ghost"
                   size="sm"
+                  class="icon-text-button"
                   @click="confirmDelete(category)"
                 >
-                  Xóa
+                  <Trash2 :size="15" aria-hidden="true" />
+                  <span>Xóa</span>
                 </CButton>
               </div>
             </div>
@@ -137,9 +165,8 @@
         </CCard>
       </div>
     </template>
-    <div v-else class="text-medium-emphasis mb-3">Không có danh mục thu.</div>
+    <div v-else class="empty-state">Không có danh mục thu.</div>
 
-    <!-- Category Modal (Add/Edit) -->
     <CModal
       backdrop="static"
       :visible="showCategoryModal"
@@ -147,7 +174,7 @@
     >
       <CModalHeader>
         <CModalTitle>{{
-          isEditMode ? "Sửa Danh Mục" : "Thêm Danh Mục"
+          isEditMode ? "Sửa danh mục" : "Thêm danh mục"
         }}</CModalTitle>
       </CModalHeader>
       <CModalBody>
@@ -155,15 +182,15 @@
           <CFormInput
             v-model="categoryForm.name"
             class="mb-3"
-            label="Tên Danh Mục"
+            label="Tên danh mục"
             required
           />
           <CFormSelect
             v-model="categoryForm.type"
             label="Loại"
             :options="[
-              { label: 'Thu Nhập', value: 'income' },
-              { label: 'Chi Tiêu', value: 'expense' },
+              { label: 'Thu nhập', value: 'income' },
+              { label: 'Chi tiêu', value: 'expense' },
             ]"
             required
           />
@@ -174,19 +201,18 @@
           Đóng
         </CButton>
         <CButton color="primary" @click="handleCategorySubmit">
-          {{ isEditMode ? "Cập Nhật" : "Thêm" }}
+          {{ isEditMode ? "Cập nhật" : "Thêm" }}
         </CButton>
       </CModalFooter>
     </CModal>
 
-    <!-- Confirm Delete Modal -->
     <CModal
       backdrop="static"
       :visible="showConfirmModal"
       @close="showConfirmModal = false"
     >
       <CModalHeader>
-        <CModalTitle>Xác Nhận Xóa</CModalTitle>
+        <CModalTitle>Xác nhận xóa</CModalTitle>
       </CModalHeader>
       <CModalBody>
         <p>Bạn có chắc chắn muốn xóa danh mục "{{ categoryToDelete.name }}"?</p>
@@ -202,7 +228,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { Pencil, Plus, Tag, Trash2 } from "@lucide/vue";
 import { useStore } from "@/stores";
 
 const store = useStore();
@@ -224,28 +251,23 @@ const defaultCategoryForm = {
 
 const categoryForm = ref({ ...defaultCategoryForm });
 
-// Open the category modal for either add or edit
 const openCategoryModal = (category = null) => {
   if (category) {
-    // Edit mode
     categoryForm.value = { ...category };
     isEditMode.value = true;
   } else {
-    // Add mode
     categoryForm.value = { ...defaultCategoryForm };
     isEditMode.value = false;
   }
+
   showCategoryModal.value = true;
 };
 
-// Handle both add and update
 const handleCategorySubmit = () => {
   try {
     if (isEditMode.value) {
-      // Update existing category
       store.updateCategory(categoryForm.value);
     } else {
-      // Add new category
       const newCategory = {
         id: Date.now().toString(),
         ...categoryForm.value,
@@ -254,7 +276,6 @@ const handleCategorySubmit = () => {
       store.addCategory(newCategory);
     }
 
-    // Close modal and reset form
     showCategoryModal.value = false;
     categoryForm.value = { ...defaultCategoryForm };
     isEditMode.value = false;
@@ -292,6 +313,7 @@ const expenseCategories = computed(() =>
     .filter((cat) => cat.type === "expense")
     .sort((a, b) => a.name.localeCompare(b.name)),
 );
+
 const incomeCategories = computed(() =>
   store.categories
     .filter((cat) => cat.type === "income")
@@ -351,17 +373,107 @@ const suppressNextClick = () => {
 </script>
 
 <style scoped>
+.categories-page {
+  padding-bottom: 96px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--coffee-space-md);
+  margin-bottom: var(--coffee-space-lg);
+}
+
+.page-label,
+.section-title {
+  color: var(--coffee-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 3.6rem);
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.action-button,
+.icon-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--coffee-space-sm);
+}
+
 .swipe-row {
   position: relative;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: var(--coffee-radius-lg);
 }
 
 .category-item {
   position: relative;
   z-index: 1;
-  transition: transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   will-change: transform;
+}
+
+.category-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(43, 24, 16, 0.12);
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--coffee-space-md);
+}
+
+.category-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--coffee-space-md);
+}
+
+.category-icon {
+  display: inline-flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(217, 119, 66, 0.2);
+  border-radius: 999px;
+  background-color: rgba(217, 119, 66, 0.12);
+  color: var(--coffee-tertiary);
+}
+
+.category-type-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 10px;
+  border: 1px solid var(--coffee-border);
+  border-radius: 999px;
+  color: var(--coffee-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.empty-state {
+  margin: var(--coffee-space-md) 0;
+  padding: var(--coffee-space-md);
+  border: 1px dashed var(--coffee-border);
+  border-radius: var(--coffee-radius-lg);
+  color: var(--coffee-secondary);
+  background-color: rgba(247, 238, 220, 0.45);
 }
 
 .swipe-actions {
@@ -370,10 +482,19 @@ const suppressNextClick = () => {
 
 .desktop-actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
 }
 
 @media (max-width: 767.98px) {
+  .page-header {
+    align-items: flex-start;
+  }
+
+  .action-button span {
+    display: none;
+  }
+
   .swipe-row {
     touch-action: pan-y;
   }
@@ -387,7 +508,13 @@ const suppressNextClick = () => {
     display: flex;
     width: 112px;
     overflow: hidden;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0;
+    transform: translateX(112px);
+    transition: transform 0.2s ease;
+  }
+
+  .swipe-actions.is-visible {
+    transform: translateX(0);
   }
 
   .swipe-action {
@@ -404,6 +531,15 @@ const suppressNextClick = () => {
   }
 
   .category-item.is-swiped {
+    transform: translateX(-112px);
+  }
+
+  .category-item:hover {
+    box-shadow: var(--coffee-shadow);
+    transform: none;
+  }
+
+  .category-item.is-swiped:hover {
     transform: translateX(-112px);
   }
 }

@@ -1,5 +1,9 @@
 <template>
-  <CNavbar expand="lg" color-scheme="light" class="bg-light d-none d-md-block">
+  <CNavbar
+    expand="lg"
+    color-scheme="light"
+    class="app-navbar d-none d-md-block"
+  >
     <CContainer fluid>
       <router-link class="navbar-brand" to="/">Sổ Thu Chi</router-link>
       <CNavbarToggler @click="visible = !visible" />
@@ -73,6 +77,27 @@ defineEmits(["show-create-transaction"]);
 </script>
 
 <style scoped>
+.app-navbar {
+  border-bottom: 1px solid var(--coffee-border);
+  background-color: rgba(247, 238, 220, 0.92);
+  box-shadow: 0 8px 24px rgba(43, 24, 16, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.navbar-brand {
+  letter-spacing: 0;
+}
+
+.nav-link {
+  border-radius: var(--coffee-radius-md);
+  color: var(--coffee-secondary);
+  font-weight: 600;
+}
+
+.nav-link:hover {
+  color: var(--coffee-tertiary);
+}
+
 .router-link-active {
   color: var(--cui-navbar-active-color);
   background-color: var(--cui-navbar-active-bg);

@@ -58,7 +58,10 @@
         :key="transaction.id"
         class="swipe-row my-3"
       >
-        <div class="swipe-actions">
+        <div
+          class="swipe-actions"
+          :class="{ 'is-visible': activeSwipeTransactionId === transaction.id }"
+        >
           <CButton
             color="primary"
             class="swipe-action"
@@ -505,7 +508,13 @@ const suppressNextClick = () => {
     display: flex;
     width: 112px;
     overflow: hidden;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0;
+    transform: translateX(112px);
+    transition: transform 0.2s ease;
+  }
+
+  .swipe-actions.is-visible {
+    transform: translateX(0);
   }
 
   .swipe-action {
