@@ -81,7 +81,7 @@ defineEmits(["show-create-transaction"]);
 <style scoped>
 .app-navbar {
   border-bottom: 1px solid var(--coffee-border);
-  background-color: rgba(247, 238, 220, 0.92);
+  background-color: color-mix(in srgb, var(--coffee-surface) 92%, transparent);
   box-shadow: 0 8px 24px rgba(43, 24, 16, 0.06);
   backdrop-filter: blur(12px);
 }

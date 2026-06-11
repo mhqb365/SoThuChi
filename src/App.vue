@@ -10,11 +10,21 @@
     <BottomMenu @show-create-transaction="showTransactionModal = true" />
     <CreateTransaction v-model="showTransactionModal" />
     <Toast />
+    <CButton
+      class="theme-toggle"
+      color="light"
+      :aria-label="theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'"
+      @click="toggleTheme"
+    >
+      <Sun v-if="theme === 'dark'" :size="18" aria-hidden="true" />
+      <Moon v-else :size="18" aria-hidden="true" />
+    </CButton>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import { Moon, Sun } from "@lucide/vue";
 import { useStore } from "@/stores";
 import { useToastStore } from "@/stores/toast.store";
 import { storageService } from "@/services/storage.service";
@@ -29,8 +39,23 @@ const store = useStore();
 const toastStore = useToastStore();
 const loading = ref(true);
 const showTransactionModal = ref(false);
+const theme = ref(localStorage.getItem("theme") || "light");
+
+const applyTheme = (value) => {
+  document.documentElement.dataset.theme = value;
+  localStorage.setItem("theme", value);
+
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  themeColor?.setAttribute("content", value === "dark" ? "#17110d" : "#ebe0ce");
+};
+
+const toggleTheme = () => {
+  theme.value = theme.value === "dark" ? "light" : "dark";
+  applyTheme(theme.value);
+};
 
 onMounted(async () => {
+  applyTheme(theme.value);
   await store.initialize();
   initFirebase();
 
@@ -72,6 +97,30 @@ watch(isAuthenticated, async (loggedIn) => {
 @media (max-width: 768px) {
   .main-content {
     padding-bottom: 60px;
+  }
+}
+
+.theme-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1040;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--coffee-border);
+  border-radius: 999px;
+  color: var(--coffee-primary);
+  background-color: var(--coffee-surface);
+  box-shadow: var(--coffee-shadow);
+}
+
+@media (max-width: 768px) {
+  .theme-toggle {
+    bottom: 96px;
   }
 }
 </style>

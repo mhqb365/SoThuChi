@@ -37,7 +37,7 @@ defineEmits(["show-create-transaction"]);
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(247, 238, 220, 0.94);
+  background: color-mix(in srgb, var(--coffee-surface) 94%, transparent);
   min-height: 82px;
   padding: 0 8px;
   z-index: 1000;
@@ -92,7 +92,7 @@ defineEmits(["show-create-transaction"]);
 }
 
 .menu-item.router-link-active:not(.add-btn) {
-  background-color: rgba(217, 119, 66, 0.14);
+  background-color: transparent;
 }
 
 .menu-item span {
@@ -101,6 +101,7 @@ defineEmits(["show-create-transaction"]);
 
 .menu-item.router-link-active span {
   color: var(--coffee-tertiary);
+  font-weight: 800;
   transform: translateY(-2px);
 }
 
