@@ -142,6 +142,24 @@ const store = reactive({
     }
   },
 
+  reorderAccounts(accountIds) {
+    const orderById = new Map(accountIds.map((id, index) => [id, index]));
+
+    this.accounts = this.accounts
+      .map((account) => ({
+        ...account,
+        order: orderById.get(account.id) ?? account.order,
+      }))
+      .sort(
+        (a, b) =>
+          (a.order ?? Number.MAX_SAFE_INTEGER) -
+          (b.order ?? Number.MAX_SAFE_INTEGER),
+      );
+
+    storageService.setItem("accounts", this.accounts);
+    this.autoBackup();
+  },
+
   deleteAccount(id) {
     const hasTransactions = this.transactions.some(
       (t) => t.accountId === id || t.fromAccount === id || t.toAccount === id,

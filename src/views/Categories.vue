@@ -1,7 +1,7 @@
 <template>
   <div class="container-lg categories-page py-4">
     <div class="page-header">
-      <h4 class="mb-0">Danh mục</h4>
+      <h4 class="mb-0">Danh Mục</h4>
       <CButton
         class="action-button"
         color="primary"
@@ -65,7 +65,7 @@
                   variant="ghost"
                   size="sm"
                   class="icon-text-button me-2"
-                  @click="openCategoryModal(category)"
+                  @click.stop="openCategoryModal(category)"
                 >
                   <Pencil :size="15" aria-hidden="true" />
                   <span>Sửa</span>
@@ -75,7 +75,7 @@
                   variant="ghost"
                   size="sm"
                   class="icon-text-button"
-                  @click="confirmDelete(category)"
+                  @click.stop="confirmDelete(category)"
                 >
                   <Trash2 :size="15" aria-hidden="true" />
                   <span>Xóa</span>
@@ -141,7 +141,7 @@
                   variant="ghost"
                   size="sm"
                   class="icon-text-button me-2"
-                  @click="openCategoryModal(category)"
+                  @click.stop="openCategoryModal(category)"
                 >
                   <Pencil :size="15" aria-hidden="true" />
                   <span>Sửa</span>
@@ -151,7 +151,7 @@
                   variant="ghost"
                   size="sm"
                   class="icon-text-button"
-                  @click="confirmDelete(category)"
+                  @click.stop="confirmDelete(category)"
                 >
                   <Trash2 :size="15" aria-hidden="true" />
                   <span>Xóa</span>
@@ -228,8 +228,10 @@
 import { computed, ref } from "vue";
 import { Pencil, Plus, Tag, Trash2 } from "@lucide/vue";
 import { useStore } from "@/stores";
+import { useRouter } from "vue-router";
 
 const store = useStore();
+const router = useRouter();
 const showCategoryModal = ref(false);
 const showConfirmModal = ref(false);
 const isEditMode = ref(false);
@@ -324,7 +326,18 @@ const handleCategoryClick = (id) => {
 
   if (activeSwipeCategoryId.value === id) {
     activeSwipeCategoryId.value = null;
+    return;
   }
+
+  if (activeSwipeCategoryId.value) {
+    activeSwipeCategoryId.value = null;
+    return;
+  }
+
+  router.push({
+    path: "/transactions",
+    query: { category: id },
+  });
 };
 
 const handleTouchStart = (event, id) => {

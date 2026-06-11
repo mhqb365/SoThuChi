@@ -31,9 +31,19 @@
     </CCard>
 
     <div
-      v-for="account in store.accounts"
+      v-for="account in sortedAccounts"
       :key="account.id"
       class="account-swipe-row my-3"
+      :class="{
+        'is-dragging': draggingAccountId === account.id,
+        'is-drag-over': dragOverAccountId === account.id,
+      }"
+      draggable="true"
+      @dragstart="handleDragStart($event, account.id)"
+      @dragover.prevent="handleDragOver(account.id)"
+      @dragenter.prevent="handleDragOver(account.id)"
+      @drop.prevent="handleDrop(account.id)"
+      @dragend="handleDragEnd"
     >
       <div
         class="swipe-actions"
@@ -197,6 +207,8 @@ const accountToDelete = ref({ id: null, name: "" });
 const isEditMode = ref(false);
 const isDefaultAccount = ref(false);
 const activeSwipeAccountId = ref(null);
+const draggingAccountId = ref(null);
+const dragOverAccountId = ref(null);
 const touchStartX = ref(0);
 const touchStartY = ref(0);
 const touchDeltaX = ref(0);
@@ -207,6 +219,30 @@ const totalBalance = computed(() => {
   return store.accounts
     .filter((account) => !store.isCreditAccount(account))
     .reduce((total, account) => total + account.balance, 0);
+});
+
+const sortedAccounts = computed(() => {
+  const hasCustomOrder = store.accounts.some((account) =>
+    Number.isFinite(account.order),
+  );
+
+  if (hasCustomOrder) {
+    return [...store.accounts].sort((a, b) => {
+      const orderDiff =
+        (a.order ?? Number.MAX_SAFE_INTEGER) -
+        (b.order ?? Number.MAX_SAFE_INTEGER);
+
+      if (orderDiff !== 0) {
+        return orderDiff;
+      }
+
+      return a.name.localeCompare(b.name, "vi", { sensitivity: "base" });
+    });
+  }
+
+  return [...store.accounts].sort((a, b) =>
+    a.name.localeCompare(b.name, "vi", { sensitivity: "base" }),
+  );
 });
 
 const defaultAccountForm = {
@@ -335,6 +371,57 @@ const handleAccountClick = (account) => {
   viewAccountTransactions(account.id);
 };
 
+const handleDragStart = (event, accountId) => {
+  draggingAccountId.value = accountId;
+  dragOverAccountId.value = accountId;
+  activeSwipeAccountId.value = null;
+
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", accountId);
+};
+
+const handleDragOver = (accountId) => {
+  if (!draggingAccountId.value || draggingAccountId.value === accountId) {
+    return;
+  }
+
+  dragOverAccountId.value = accountId;
+};
+
+const handleDrop = (targetAccountId) => {
+  const sourceAccountId = draggingAccountId.value;
+
+  if (!sourceAccountId || sourceAccountId === targetAccountId) {
+    handleDragEnd();
+    return;
+  }
+
+  const reorderedAccounts = [...sortedAccounts.value];
+  const sourceIndex = reorderedAccounts.findIndex(
+    (account) => account.id === sourceAccountId,
+  );
+  const targetIndex = reorderedAccounts.findIndex(
+    (account) => account.id === targetAccountId,
+  );
+
+  if (sourceIndex === -1 || targetIndex === -1) {
+    handleDragEnd();
+    return;
+  }
+
+  const [movedAccount] = reorderedAccounts.splice(sourceIndex, 1);
+  reorderedAccounts.splice(targetIndex, 0, movedAccount);
+
+  store.reorderAccounts(reorderedAccounts.map((account) => account.id));
+  suppressNextClick();
+  handleDragEnd();
+};
+
+const handleDragEnd = () => {
+  draggingAccountId.value = null;
+  dragOverAccountId.value = null;
+};
+
 const handleTouchStart = (event, accountId) => {
   const touch = event.touches[0];
   touchStartX.value = touch.clientX;
@@ -382,6 +469,15 @@ const suppressNextClick = () => {
   position: relative;
   overflow: hidden;
   border-radius: 6px;
+}
+
+.account-swipe-row.is-dragging {
+  opacity: 0.55;
+}
+
+.account-swipe-row.is-drag-over .account-item {
+  outline: 2px solid var(--cui-primary);
+  outline-offset: 2px;
 }
 
 .account-item {
