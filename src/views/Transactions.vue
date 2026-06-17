@@ -48,6 +48,20 @@
       </div>
     </div>
 
+    <div
+      class="transaction-summary d-flex justify-content-between align-items-center fw-semibold mb-3"
+    >
+      <span>{{ sortedTransactions.length }} giao dịch</span>
+      <span
+        :class="{
+          'text-success': selectedTransactionsTotal > 0,
+          'text-danger': selectedTransactionsTotal < 0,
+        }"
+      >
+        {{ formatSignedAmount(selectedTransactionsTotal) }}
+      </span>
+    </div>
+
     <!-- Group transactions by date -->
     <template v-for="(transactions, date) in groupedTransactions" :key="date">
       <div class="fw-bold fs-6 text-primary">
@@ -257,6 +271,12 @@ const groupedTransactions = computed(() => {
   return groups;
 });
 
+const selectedTransactionsTotal = computed(() => {
+  return sortedTransactions.value.reduce((total, transaction) => {
+    return total + getTransactionAmountChange(transaction);
+  }, 0);
+});
+
 const handleDateRangeChange = (range) => {
   dateRange.value = {
     start: range.start,
@@ -363,6 +383,40 @@ const getAccountName = (id) => {
 
 const getCategoryName = (id) => {
   return store.categories.find((cat) => cat.id === id)?.name || "";
+};
+
+const getTransactionAmountChange = (transaction) => {
+  if (transaction.type === "expense") {
+    return -transaction.amount;
+  }
+
+  if (transaction.type === "income" || transaction.type === "credit_payment") {
+    return transaction.amount;
+  }
+
+  if (transaction.type === "transfer" && selectedAccountId.value !== null) {
+    if (transaction.fromAccount === selectedAccountId.value) {
+      return -transaction.amount;
+    }
+
+    if (transaction.toAccount === selectedAccountId.value) {
+      return transaction.amount;
+    }
+  }
+
+  return 0;
+};
+
+const formatSignedAmount = (amount) => {
+  if (amount > 0) {
+    return `+${amount.toLocaleString()}đ`;
+  }
+
+  if (amount < 0) {
+    return `-${Math.abs(amount).toLocaleString()}đ`;
+  }
+
+  return "0đ";
 };
 
 const formatDateTime = (dateString) => {
@@ -492,6 +546,10 @@ const suppressNextClick = () => {
 .desktop-actions {
   display: flex;
   align-items: center;
+}
+
+.transaction-summary {
+  color: var(--cui-body-color);
 }
 
 @media (max-width: 767.98px) {

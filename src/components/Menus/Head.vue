@@ -114,4 +114,9 @@ defineEmits(["show-create-transaction"]);
   color: var(--cui-navbar-active-color);
   background-color: var(--cui-navbar-active-bg);
 }
+
+:global(html[data-theme="dark"]) .nav-link.active,
+:global(html[data-theme="dark"]) .nav-link.router-link-active {
+  color: #fff !important;
+}
 </style>

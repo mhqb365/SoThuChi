@@ -62,7 +62,7 @@ html[data-theme="dark"] {
   --cui-card-color: var(--coffee-primary);
   --cui-link-color: var(--coffee-tertiary);
   --cui-link-hover-color: #ffad78;
-  --cui-navbar-active-color: var(--coffee-primary);
+  --cui-navbar-active-color: #fff;
   --cui-navbar-active-bg: rgba(240, 138, 75, 0.18);
 }
 
@@ -101,6 +101,15 @@ html[data-theme="dark"] body {
       rgba(23, 17, 13, 0) 280px
     ),
     var(--coffee-neutral);
+}
+
+html[data-theme="dark"] .app-navbar.navbar-light {
+  --cui-navbar-active-color: #fff;
+}
+
+html[data-theme="dark"] .app-navbar .navbar-nav .nav-link.active,
+html[data-theme="dark"] .app-navbar .navbar-nav .nav-link.router-link-active {
+  color: #fff;
 }
 
 h1,

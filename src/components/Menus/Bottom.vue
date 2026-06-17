@@ -106,30 +106,34 @@ defineEmits(["show-create-transaction"]);
 }
 
 .add-btn {
-  flex: 0 0 52px;
+  flex: 0 0 56px;
   align-self: center;
   color: white;
   background: var(--coffee-tertiary);
-  width: 52px;
-  height: 52px;
-  min-height: 52px;
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
   padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: -30px 4px 0;
-  box-shadow: 0 8px 18px rgba(217, 119, 66, 0.28);
+  margin: -42px 4px 0;
+  box-shadow:
+    0 16px 28px rgba(217, 119, 66, 0.32),
+    0 8px 14px rgba(43, 24, 16, 0.18);
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .add-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 10px 22px rgba(217, 119, 66, 0.34);
+  transform: translateY(-4px) scale(1.08);
+  box-shadow:
+    0 20px 34px rgba(217, 119, 66, 0.36),
+    0 10px 18px rgba(43, 24, 16, 0.2);
 }
 
 .add-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.95);
 }
 
 .menu-item:hover,
