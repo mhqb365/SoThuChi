@@ -89,22 +89,50 @@
                 />
               </CCol>
               <CCol>
-                <CFormInput
-                  v-model.number="transactionForm.amount"
-                  label="Số Tiền"
-                  type="number"
-                  inputmode="numeric"
-                  required
-                />
+                <div class="amount-field clearable-field">
+                  <CFormInput
+                    v-model.number="transactionForm.amount"
+                    label="Số Tiền"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    required
+                  />
+                  <button
+                    v-if="hasInputValue(transactionForm.amount)"
+                    class="clear-input-button"
+                    type="button"
+                    aria-label="Xóa số tiền"
+                    @click="transactionForm.amount = ''"
+                  >
+                    <X :size="16" aria-hidden="true" />
+                  </button>
+                  <small
+                    v-if="transactionAmountPreview"
+                    class="amount-preview"
+                  >
+                    {{ transactionAmountPreview }}
+                  </small>
+                </div>
               </CCol>
             </CRow>
 
-            <CFormInput
-              v-model="transactionForm.description"
-              class="mb-3"
-              label="Mô Tả"
-              required
-            />
+            <div class="clearable-field mb-3">
+              <CFormInput
+                v-model="transactionForm.description"
+                label="Mô Tả"
+                required
+              />
+              <button
+                v-if="hasInputValue(transactionForm.description)"
+                class="clear-input-button"
+                type="button"
+                aria-label="Xóa mô tả"
+                @click="transactionForm.description = ''"
+              >
+                <X :size="16" aria-hidden="true" />
+              </button>
+            </div>
 
             <div class="d-flex">
               <CFormInput
@@ -151,14 +179,28 @@
               ]"
               required
             />
-            <CFormInput
-              v-model.number="transferForm.amount"
-              class="mb-3"
-              label="Số Tiền"
-              type="number"
-              inputmode="numeric"
-              required
-            />
+            <div class="amount-field clearable-field mb-3">
+              <CFormInput
+                v-model.number="transferForm.amount"
+                label="Số Tiền"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                required
+              />
+              <button
+                v-if="hasInputValue(transferForm.amount)"
+                class="clear-input-button"
+                type="button"
+                aria-label="Xóa số tiền"
+                @click="transferForm.amount = ''"
+              >
+                <X :size="16" aria-hidden="true" />
+              </button>
+              <small v-if="transferAmountPreview" class="amount-preview">
+                {{ transferAmountPreview }}
+              </small>
+            </div>
             <div class="mb-3 d-flex">
               <CFormInput
                 v-model="transferForm.dateInput"
@@ -189,14 +231,31 @@
               ]"
               required
             />
-            <CFormInput
-              v-model.number="creditPaymentForm.amount"
-              class="mb-3"
-              label="Số Tiền Thanh Toán"
-              type="number"
-              inputmode="numeric"
-              required
-            />
+            <div class="amount-field clearable-field mb-3">
+              <CFormInput
+                v-model.number="creditPaymentForm.amount"
+                label="Số Tiền Thanh Toán"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                required
+              />
+              <button
+                v-if="hasInputValue(creditPaymentForm.amount)"
+                class="clear-input-button"
+                type="button"
+                aria-label="Xóa số tiền"
+                @click="creditPaymentForm.amount = ''"
+              >
+                <X :size="16" aria-hidden="true" />
+              </button>
+              <small
+                v-if="creditPaymentAmountPreview"
+                class="amount-preview"
+              >
+                {{ creditPaymentAmountPreview }}
+              </small>
+            </div>
             <div class="mb-3 d-flex">
               <CFormInput
                 v-model="creditPaymentForm.dateInput"
@@ -227,6 +286,7 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import { X } from "@lucide/vue";
 import { useStore } from "@/stores";
 import moment from "moment";
 
@@ -298,6 +358,41 @@ const submitLabel = computed(() => {
   return "Thanh toán";
 });
 
+const normalizeAmount = (amount) => {
+  const numericAmount = Number(amount);
+
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+    return 0;
+  }
+
+  return numericAmount < 1000 ? numericAmount * 1000 : numericAmount;
+};
+
+const getAmountPreview = (amount) => {
+  const numericAmount = Number(amount);
+  const normalizedAmount = normalizeAmount(amount);
+
+  if (!normalizedAmount || normalizedAmount === numericAmount) {
+    return "";
+  }
+
+  return `${normalizedAmount.toLocaleString("vi-VN")} đ`;
+};
+
+const hasInputValue = (value) => {
+  return value !== "" && value !== null && value !== undefined;
+};
+
+const transactionAmountPreview = computed(() =>
+  getAmountPreview(transactionForm.value.amount),
+);
+const transferAmountPreview = computed(() =>
+  getAmountPreview(transferForm.value.amount),
+);
+const creditPaymentAmountPreview = computed(() =>
+  getAmountPreview(creditPaymentForm.value.amount),
+);
+
 const filteredCategories = computed(() => {
   return store.categories
     .filter((cat) => cat.type === transactionForm.value.type)
@@ -361,7 +456,7 @@ const handleTransactionSubmit = async () => {
       ...transactionForm.value,
       accountId: transactionForm.value.accountId.toString(),
       categoryId: transactionForm.value.categoryId.toString(),
-      amount: Number(transactionForm.value.amount),
+      amount: normalizeAmount(transactionForm.value.amount),
       date: date.toISOString(),
     });
 
@@ -414,7 +509,7 @@ const handleTransferSubmit = async () => {
       ...transferForm.value,
       fromAccount: transferForm.value.fromAccount.toString(),
       toAccount: transferForm.value.toAccount.toString(),
-      amount: Number(transferForm.value.amount),
+      amount: normalizeAmount(transferForm.value.amount),
       date: date.toISOString(),
     });
 
@@ -449,7 +544,7 @@ const handleCreditPaymentSubmit = async () => {
     await store.addTransaction({
       type: "credit_payment",
       accountId: creditPaymentForm.value.accountId.toString(),
-      amount: Number(creditPaymentForm.value.amount),
+      amount: normalizeAmount(creditPaymentForm.value.amount),
       description: "Thanh toán thẻ tín dụng",
       date: date.toISOString(),
     });
@@ -476,3 +571,47 @@ const handleSubmit = () => {
   }
 };
 </script>
+
+<style scoped>
+.amount-field {
+  min-height: 86px;
+}
+
+.amount-preview {
+  display: block;
+  margin-top: 4px;
+  padding-left: 2px;
+  color: var(--coffee-secondary);
+  font-size: 0.92rem;
+}
+
+.clearable-field {
+  position: relative;
+}
+
+.clearable-field :deep(.form-control) {
+  padding-right: 2.75rem;
+}
+
+.clear-input-button {
+  position: absolute;
+  top: 37px;
+  right: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: var(--coffee-secondary);
+  background: transparent;
+}
+
+.clear-input-button:hover {
+  color: var(--coffee-primary);
+  background-color: rgba(138, 114, 96, 0.12);
+}
+</style>
