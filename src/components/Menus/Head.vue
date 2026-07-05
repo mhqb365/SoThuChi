@@ -86,6 +86,12 @@ defineEmits(["show-create-transaction"]);
   backdrop-filter: blur(12px);
 }
 
+@media (max-width: 768px) {
+  .app-navbar {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
 .navbar-brand {
   display: inline-flex;
   align-items: center;

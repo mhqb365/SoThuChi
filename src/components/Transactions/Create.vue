@@ -107,10 +107,7 @@
                   >
                     <X :size="16" aria-hidden="true" />
                   </button>
-                  <small
-                    v-if="transactionAmountPreview"
-                    class="amount-preview"
-                  >
+                  <small v-if="transactionAmountPreview" class="amount-preview">
                     {{ transactionAmountPreview }}
                   </small>
                 </div>
@@ -249,10 +246,7 @@
               >
                 <X :size="16" aria-hidden="true" />
               </button>
-              <small
-                v-if="creditPaymentAmountPreview"
-                class="amount-preview"
-              >
+              <small v-if="creditPaymentAmountPreview" class="amount-preview">
                 {{ creditPaymentAmountPreview }}
               </small>
             </div>

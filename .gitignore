@@ -47,3 +47,6 @@ coverage
 AGENTS.md
 GEMINI.md
 ERRORS.md
+
+.pnpm-store
+.agents

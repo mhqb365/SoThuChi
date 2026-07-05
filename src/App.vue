@@ -13,7 +13,11 @@
     <CButton
       class="theme-toggle"
       color="light"
-      :aria-label="theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'"
+      :aria-label="
+        theme === 'dark'
+          ? 'Chuyển sang giao diện sáng'
+          : 'Chuyển sang giao diện tối'
+      "
       @click="toggleTheme"
     >
       <Sun v-if="theme === 'dark'" :size="18" aria-hidden="true" />
@@ -80,6 +84,13 @@ watch(isAuthenticated, async (loggedIn) => {
 </script>
 
 <style>
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
@@ -95,6 +106,10 @@ watch(isAuthenticated, async (loggedIn) => {
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding-top: var(--safe-area-top);
+  }
+
   .main-content {
     padding-bottom: 60px;
   }
@@ -120,7 +135,8 @@ watch(isAuthenticated, async (loggedIn) => {
 
 @media (max-width: 768px) {
   .theme-toggle {
-    bottom: 96px;
+    right: calc(18px + var(--safe-area-right));
+    bottom: calc(96px + var(--safe-area-bottom));
   }
 }
 </style>
